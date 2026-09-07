@@ -18,6 +18,25 @@ By establishing platform-neutral contracts for state observations, proposed oper
 - **Evidence and Assessment Lineage:** Explicit binding of `ConsequenceAssessment` to `evaluationContextId` and `actionId`, along with strict evidence identity uniqueness, guarantees reproducible evaluation traces across benchmark datasets.
 - **Epistemological Integrity:** Preserves the tri-modal boundary (`VERIFIED`, `SIMULATED`, `PREDICTED`), ensuring machine learning predictions are never conflated with deterministic verification or empirical simulation.
 
+## ActionGraph Structural Intermediate Representation (Sprint FC-003)
+
+Sprint FC-003 establishes the `ActionGraph` representation over canonical evaluation records. The ActionGraph serves as a candidate structural intermediate representation (IR) connecting entities, facts, actions, assessments, consequences, and evidence via a controlled structural vocabulary.
+
+In future research milestones, the ActionGraph may serve as an analytical substrate for investigating:
+- **Cross-Application Structural Consistency:** Whether heterogeneous desktop, terminal, and web environments produce topologically consistent graph relationships for semantically equivalent actions.
+- **Graph Coverage & Representation Completeness:** Measuring the proportion of observable domain entities and side effects captured in the graph versus unmodeled background state.
+- **Canonical Relation Consistency:** Verifying that structural edges (e.g. target roles, affected entities, and evidence bindings) remain invariant across diverse adapter implementations.
+- **Future Consequence-Path Prediction:** Serving as a potential input representation for prospective downstream models exploring multi-hop consequence propagation (strictly future work; FC-003 provides no causal or predictive logic).
+- **Representation Transfer:** Exploring whether relational patterns learned in one application domain can transfer to distinct software environments without retraining.
+
+### Conceptual Relationship to FutureBench
+Future FutureBench benchmark examples may conceptually include:
+1. Canonical `ActionEvaluationContext`
+2. Canonical `ConsequenceAssessment`
+3. Derived `ActionGraph` structural representation
+
+This pairing may later support quantitative benchmarking of representation coverage, relational consistency, and downstream consequence prediction quality. No datasets or benchmark runs have been collected at this stage.
+
 ## Central Research Questions & Measurable Future Investigations
 
 1. **Representation Coverage Across Applications:** What percentage of common desktop and web user actions can be mapped into the canonical State → Action schema without loss of critical semantic nuance?
@@ -31,4 +50,4 @@ By establishing platform-neutral contracts for state observations, proposed oper
 ## Scientific Status and Non-Claim Statement
 
 **Explicit Statement on Current Scientific Status:**
-FutureClick is in early architectural and domain-modeling development (`Sprint FC-002 / FC-002A`). No benchmark results, accuracy metrics, user study data, novel algorithmic proofs, generalization claims, or publication-ready findings exist at this stage. All research questions and normalization conventions outlined above represent prospective avenues of empirical investigation.
+FutureClick is in early architectural and domain-modeling development (`Sprint FC-003`). No benchmark results, accuracy metrics, user study data, novel algorithmic proofs, generalization claims, or publication-ready findings exist at this stage. All research questions and normalization conventions outlined above represent prospective avenues of empirical investigation.
