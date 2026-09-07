@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.20.0"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check TypeScript Formatting
+        run: pnpm run format:check:ts
+
+      - name: Lint TypeScript
+        run: pnpm run lint:ts
+
+      - name: Typecheck TypeScript
+        run: pnpm run typecheck:ts
+
+      - name: Run TypeScript Tests
+        run: pnpm run test:ts
+
+      - name: Build TypeScript Packages
+        run: pnpm run build:ts
+
+  python:
+    name: Python Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.7"
+          enable-cache: true
+
+      - name: Sync Python Dependencies (Locked)
+        run: uv sync --locked --all-packages
+
+      - name: Check Python Formatting
+        run: uv run --locked ruff format --check .
+
+      - name: Lint Python
+        run: uv run --locked ruff check .
+
+      - name: Typecheck Python
+        run: uv run --locked mypy services/prediction-engine/src research/futurebench/src
+
+      - name: Run Python Tests
+        run: uv run --locked pytest
+
+      - name: Verify Python Package Distribution Builds
+        run: bash scripts/build_python.sh
+
+  quality-gate:
+    name: End-to-End Quality Gate (pnpm quality)
+    runs-on: ubuntu-latest
+    needs: [typescript, python]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.20.0"
+          cache: "pnpm"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.7"
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          uv sync --locked --all-packages
+
+      - name: Run Unified Quality Command
+        run: pnpm quality

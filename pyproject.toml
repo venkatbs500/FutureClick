@@ -1,0 +1,40 @@
+[project]
+name = "futureclick-workspace"
+version = "0.1.0"
+description = "FutureClick Python research workspace"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "hatchling>=1.27.0",
+    "mypy>=1.14.0",
+    "pytest>=8.3.0",
+    "ruff>=0.9.0",
+]
+
+[tool.uv.workspace]
+members = ["services/prediction-engine", "research/futurebench"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+pythonpath = [
+    "services/prediction-engine/src",
+    "research/futurebench/src",
+]
+testpaths = [
+    "services/prediction-engine/tests",
+    "research/futurebench/tests",
+]
