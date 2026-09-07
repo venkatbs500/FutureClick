@@ -43,7 +43,7 @@ Human-Facing Preview Surface
 FutureClick maintains strict epistemological boundaries across evaluation modalities:
 - **VERIFIED:** A consequence derived deterministically from available evidence within an explicitly defined scope and set of assumptions. It is NOT philosophical or unconditional certainty; verification may still fail if observed state is incomplete, underlying data is stale, platform behavior drifts, or core assumptions are violated.
 - **SIMULATED:** A consequence observed in an isolated, sandboxed, or controlled execution context under specific test conditions; it does not guarantee that live environments will behave identically.
-- **PREDICTED:** A probabilistic or model-derived consequence projection exposing calibrated confidence scores and explicit uncertainty; it must never be represented as verified fact.
+- **PREDICTED:** A probabilistic or model-derived consequence projection exposing bounded uncertainty; future evaluators may emit calibrated confidence values, but predictions must never be represented as verified fact.
 
 Detailed architectural specifications and decisions are documented in:
 - [Architecture Overview](docs/architecture/OVERVIEW.md)

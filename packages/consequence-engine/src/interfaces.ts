@@ -1,29 +1,30 @@
 /**
  * Interfaces for consequence evaluation and orchestration.
+ * Updated for Sprint FC-002 / FC-002A / FC-002B canonical domain integration.
+ *
+ * Removes the EvaluationRequest wrapper to ensure exactly one source of truth:
+ * ActionEvaluationContext.
  */
 
 import type {
-  ActionConsequence,
-  ConsequenceKind,
-  EnvironmentState,
-  ProposedAction,
+  ActionEvaluationContext,
+  Consequence,
+  ConsequenceAssessment,
+  ConsequenceCategory,
+  EvidenceMode,
 } from "@futureclick/action-schema";
 import type { Result } from "@futureclick/shared";
 
-export interface EvaluationRequest {
-  readonly action: ProposedAction;
-  readonly state: EnvironmentState;
-}
-
-export interface EvaluationResult {
-  readonly consequences: readonly ActionConsequence[];
+export interface EvaluatorResult {
+  readonly consequences: readonly Consequence[];
 }
 
 export interface IConsequenceEvaluator {
-  readonly kind: ConsequenceKind;
-  evaluate(request: EvaluationRequest): Promise<Result<EvaluationResult, Error>>;
+  readonly mode: EvidenceMode;
+  readonly kind?: ConsequenceCategory | string;
+  evaluate(context: ActionEvaluationContext): Promise<Result<EvaluatorResult, Error>>;
 }
 
 export interface IConsequenceEngine {
-  evaluate(request: EvaluationRequest): Promise<Result<readonly ActionConsequence[], Error>>;
+  evaluate(context: ActionEvaluationContext): Promise<Result<ConsequenceAssessment, Error>>;
 }

@@ -12,6 +12,6 @@ The ActionGraph is the central intermediate representation (IR) within FutureCli
 - **State:** Pre-action and post-action environmental states.
 - **Consequences:** Multi-hop ramifications, side effects, downstream state mutations.
 
-## Sprint FC-001 Scope
+## Sprint FC-002 Scope
 
-In FC-001, we provide a tiny graph container API and baseline unit tests to validate package compilation and boundary definitions. The complete graph query engine, multi-hop dependency analysis, and cycle detection will be implemented in future research sprints.
+Future ActionGraph implementations will consume the canonical domain models (`CanonicalEntity`, `ProposedAction`, `StateSnapshot`, `Consequence`, `ActionEvaluationContext`) defined in `@futureclick/action-schema` rather than defining competing domain schemas. The current container API represents a structural relational graph placeholder; graph query engines, multi-hop dependency analysis, and cycle detection will be developed in future research sprints.

@@ -48,7 +48,7 @@ FutureClick is designed to preserve provenance and support auditable consequence
 ### 5. Uncertainty Is First-Class
 Prediction is inherently probabilistic in open computer environments. FutureClick rejects binary "safe/unsafe" heuristics without confidence weighting. Every consequence output includes:
 - Calibrated `ConfidenceScore` in \([0.0, 1.0]\).
-- Categorized `ReversibilityLevel` (`fully_reversible`, `partially_reversible`, `irreversible`, `unknown`).
+- Categorized `ReversibilityLevel` (`reversible`, `partially_reversible`, `irreversible`, `unknown`).
 - Supporting `EvidenceRecord` chain.
 
 ### 6. Truth Classification Hierarchy

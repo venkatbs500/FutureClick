@@ -2,7 +2,7 @@
 
 FutureClick is designed to observe pre-execution state and user actions across graphical operating systems and web platforms. Because this capability touches sensitive user environments, privacy and security are not cosmetic post-processing layers—they are non-negotiable architectural requirements.
 
-The following 14 principles govern all current and future engineering at FutureClick:
+The following 15 principles govern all current and future engineering at FutureClick:
 
 ## 1. Local-First Processing Whenever Technically Reasonable
 Consequence evaluation, AST analysis, and state extraction must execute on the user's local machine by default. Remote processing is strictly opt-in and restricted to workloads that cannot execute locally.
@@ -48,3 +48,11 @@ FutureClick is an advisory and consequence-prediction engine. It must never auto
 
 ## 14. Security and Privacy Requirements Are Architectural Requirements
 Security and privacy guarantees must be implemented at the schema, type-system, and package-boundary levels. They cannot be bypassed for convenience or deferred as technical debt.
+
+## 15. Canonical Domain Model Privacy and Trust-Boundary Guarantees (Sprint FC-002 / FC-002A)
+- **JSON-Safe Does NOT Mean Privacy-Safe:** Runtime validation verifies data structure and serialization soundness; it does NOT inspect or enforce privacy posture. JSON validation cannot know whether a string contains an API token, private key, session cookie, or personal credential. Redaction remains the non-delegable duty of platform adapters at the trust boundary.
+- **Attribute and Parameter Minimization:** Entities and proposed actions capture only the minimal attributes required for consequence analysis. Adapters must never inject bulk document contents, user profiles, or raw data structures when derived categorical features suffice.
+- **Zero Credentials in Core Envelopes:** Tokens, passwords, private keys, authentication cookies, and raw credentials must never be included in `CanonicalEntity.attributes` or `ProposedAction.parameters`.
+- **Pre-Canonicalization Redaction:** Platform adapters are responsible for sanitizing and redacting sensitive values before constructing canonical domain instances. The core schema accepts only pre-sanitized attributes.
+- **Strict JSON-Safe Value Boundaries:** All dynamic attributes and parameters must strictly validate against the recursive `JsonValue` contract. Functions, class instances, symbols, and prototypes are prohibited from crossing package or IPC boundaries.
+- **Fail-Closed Runtime Boundary Safety:** Untrusted external structures that violate schema or type boundaries are rejected via structured error results rather than coerced or silently admitted. Defensive property access protects against hostile getters, throwing prototypes, and malicious string coercion.

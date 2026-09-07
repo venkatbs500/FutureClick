@@ -1,16 +1,20 @@
 import { createDeterministicIdGenerator, currentIsoTimestamp } from "@futureclick/shared";
 import { describe, expect, it } from "vitest";
 import type {
-  ActionConsequence,
   ActionId,
+  Consequence,
   ConsequenceId,
-  EnvironmentState,
+  EntityId,
   EvidenceId,
   ProposedAction,
-  StateId,
-  TargetId,
+  StateSnapshot,
+  StateSnapshotId,
 } from "../src/index.js";
-import { createConfidenceScore, isValidConfidenceScore } from "../src/index.js";
+import {
+  FUTURECLICK_SCHEMA_VERSION,
+  createConfidenceScore,
+  isValidConfidenceScore,
+} from "../src/index.js";
 
 describe("action-schema/types", () => {
   it("validates confidence scores within [0.0, 1.0]", () => {
@@ -37,59 +41,78 @@ describe("action-schema/types", () => {
     expect(() => createConfidenceScore(Number.POSITIVE_INFINITY)).toThrow(RangeError);
   });
 
-  it("constructs type-checked schema objects adhering to contract", () => {
+  it("constructs type-checked canonical schema objects adhering to contract", () => {
     const idGen = createDeterministicIdGenerator("schema-test");
-    const stateId = idGen.generate<"StateId">("state");
+    const stateId = idGen.generate<"StateSnapshotId">("state");
     const actionId = idGen.generate<"ActionId">("act");
-    const targetId = idGen.generate<"TargetId">("tgt");
+    const targetEntityId = idGen.generate<"EntityId">("ent");
     const consequenceId = idGen.generate<"ConsequenceId">("csq");
     const evidenceId = idGen.generate<"EvidenceId">("ev");
     const ts = currentIsoTimestamp();
 
-    const state: EnvironmentState = {
+    const env = {
+      environmentId: "env-cloud",
+      kind: "service" as const,
+      platform: "web" as const,
+      application: { name: "CloudStorageApp" },
+    };
+
+    const state: StateSnapshot = {
+      schemaVersion: FUTURECLICK_SCHEMA_VERSION,
       id: stateId,
-      timestamp: ts,
-      platform: "browser",
-      applicationName: "CloudStorageApp",
+      observedAt: ts,
+      environment: env,
+      entities: [
+        {
+          id: targetEntityId,
+          kind: "resource",
+          label: "Cloud Project",
+        },
+      ],
+      facts: [],
     };
 
     const action: ProposedAction = {
+      schemaVersion: FUTURECLICK_SCHEMA_VERSION,
       id: actionId,
-      category: "delete",
-      target: {
-        id: targetId,
-        kind: "button",
-        label: "Delete Project",
-      },
-      timestamp: ts,
-      stateId: state.id,
+      proposedAt: ts,
+      environment: env,
+      actor: { kind: "human", id: "user-123" },
+      intent: { verb: "delete", domain: "cloud" },
+      targets: [{ entityId: targetEntityId, role: "primary" }],
+      parameters: { permanent: true },
+      executionStatus: "proposed",
     };
 
-    const consequence: ActionConsequence = {
+    const consequence: Consequence = {
+      schemaVersion: FUTURECLICK_SCHEMA_VERSION,
       id: consequenceId,
       actionId: action.id,
-      kind: "verified",
+      kind: "data-loss",
       summary: "Permanently removes cloud project and all associated datasets",
-      reversibility: "irreversible",
+      affectedEntities: [targetEntityId],
+      stateChanges: [],
+      reversibility: { level: "irreversible" },
+      risk: { severity: "high", categories: ["data-loss"] },
       confidence: createConfidenceScore(1.0),
       evidence: [
         {
           id: evidenceId,
-          source: "deterministic_rule",
+          mode: "verified",
+          source: "rule",
+          observedAt: ts,
+          scope: "cloud-deletion-api",
+          assumptions: [],
           summary: "API contract specifies immediate, non-recoverable deletion",
         },
       ],
-      provenance: {
-        engineVersion: "0.1.0",
-        evaluationTimestamp: ts,
-        deterministic: true,
-      },
+      temporal: { timing: "immediate", frequency: "once" },
     };
 
-    expect(state.platform).toBe("browser");
-    expect(action.category).toBe("delete");
-    expect(consequence.kind).toBe("verified");
-    expect(consequence.reversibility).toBe("irreversible");
+    expect(state.environment.platform).toBe("web");
+    expect(action.intent.verb).toBe("delete");
+    expect(consequence.kind).toBe("data-loss");
+    expect(consequence.reversibility.level).toBe("irreversible");
     expect(consequence.confidence).toBe(1.0);
   });
 });
