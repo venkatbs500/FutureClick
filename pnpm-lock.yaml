@@ -115,6 +115,9 @@ importers:
 
   packages/consequence-engine:
     dependencies:
+      '@futureclick/action-graph':
+        specifier: workspace:*
+        version: link:../action-graph
       '@futureclick/action-schema':
         specifier: workspace:*
         version: link:../action-schema

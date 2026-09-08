@@ -34,8 +34,18 @@ Future FutureBench benchmark examples may conceptually include:
 1. Canonical `ActionEvaluationContext`
 2. Canonical `ConsequenceAssessment`
 3. Derived `ActionGraph` structural representation
+4. Deterministic rule evaluation trace and derived consequences
+5. Actual observed outcome when later available
 
-This pairing may later support quantitative benchmarking of representation coverage, relational consistency, and downstream consequence prediction quality. No datasets or benchmark runs have been collected at this stage.
+This alignment may later support empirical comparison between `VERIFIED` deterministic deductions, `SIMULATED` sandbox executions, and `PREDICTED` statistical inferences. No benchmark collection or empirical trials are implemented in FC-004.
+
+## Deterministic Baseline Foundation (Sprint FC-004)
+
+Sprint FC-004 introduces FutureClick's first deterministic consequence derivation baseline. In future research milestones, this deterministic layer may support empirical investigations on:
+- **Deterministic Baseline Coverage:** Measuring the proportion of common computer actions amenable to formal, verifiable state transition rules versus those requiring statistical prediction or empirical simulation.
+- **Abstention and Insufficiency Rates:** Quantifying how often real-world contexts lack necessary preconditions for deterministic derivation, defining the boundary where learned models must take over.
+- **Calibration of Learned Models:** Using deterministic rule derivations as high-confidence anchor subsets for calibrating downstream statistical consequence predictors.
+- **Rule/Graph Consistency:** Empirically evaluating whether structural graph queries provide sufficient context for deterministic decision models across heterogeneous environments.
 
 ## Central Research Questions & Measurable Future Investigations
 
@@ -50,4 +60,4 @@ This pairing may later support quantitative benchmarking of representation cover
 ## Scientific Status and Non-Claim Statement
 
 **Explicit Statement on Current Scientific Status:**
-FutureClick is in early architectural and domain-modeling development (`Sprint FC-003`). No benchmark results, accuracy metrics, user study data, novel algorithmic proofs, generalization claims, or publication-ready findings exist at this stage. All research questions and normalization conventions outlined above represent prospective avenues of empirical investigation.
+FutureClick is in early architectural and engineering foundation development (`Sprint FC-004`). No benchmark results, accuracy metrics, user study data, novel algorithmic proofs, generalization claims, causal proofs, or publication-ready findings exist at this stage. All research questions and normalization conventions outlined above represent prospective avenues of empirical investigation.

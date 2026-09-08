@@ -19,6 +19,7 @@
     "lint": "biome lint src tests"
   },
   "dependencies": {
+    "@futureclick/action-graph": "workspace:*",
     "@futureclick/action-schema": "workspace:*",
     "@futureclick/shared": "workspace:*"
   },
