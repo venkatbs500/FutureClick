@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Fixture Server for FC-005 (Sprint FC-005)
+ * Fixture Server for FutureClick browser extension (FC-005 / FC-006)
  *
  * Epistemological Boundary:
  * Minimal HTTP server serving ONLY authorized local synthetic fixture files.
@@ -9,7 +9,7 @@
  * Requirements:
  * - Binds strictly to 127.0.0.1 (never 0.0.0.0 or remote addresses).
  * - Listens on port 4173.
- * - Serves ONLY allowlisted paths under /fc005/.
+ * - Serves ONLY allowlisted exact fixture paths.
  * - No directory listing.
  * - No repository-root or parent directory access.
  */
@@ -23,22 +23,24 @@ const BIND_ADDRESS = "127.0.0.1";
 const PORT = 4173;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_DIR = path.resolve(__dirname, "../tests/fixtures/fc005");
+const FIXTURES_ROOT = path.resolve(__dirname, "../tests/fixtures");
 
 const ALLOWED_ROUTES = new Map([
-  ["/fc005/repository-visibility.html", "repository-visibility.html"],
-  ["/fc005/browser-tests.html", "browser-tests.html"],
+  ["/fc005/repository-visibility.html", path.join("fc005", "repository-visibility.html")],
+  ["/fc005/browser-tests.html", path.join("fc005", "browser-tests.html")],
+  [
+    "/fc006/repository-visibility-interception.html",
+    path.join("fc006", "repository-visibility-interception.html"),
+  ],
 ]);
 
 const server = http.createServer((req, res) => {
-  // Only accept GET and HEAD
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.writeHead(405, { "Content-Type": "text/plain" });
     res.end("Method Not Allowed");
     return;
   }
 
-  // Parse path without query or hash
   let reqPath = "/";
   try {
     const parsedUrl = new URL(req.url || "/", `http://${BIND_ADDRESS}:${PORT}`);
@@ -49,17 +51,16 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const filename = ALLOWED_ROUTES.get(reqPath);
-  if (!filename) {
+  const relativeFile = ALLOWED_ROUTES.get(reqPath);
+  if (!relativeFile) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.end("Not Found: Fixture route is not authorized.");
     return;
   }
 
-  const filePath = path.resolve(FIXTURE_DIR, filename);
+  const filePath = path.resolve(FIXTURES_ROOT, relativeFile);
 
-  // Path traversal defense
-  if (!filePath.startsWith(FIXTURE_DIR)) {
+  if (!filePath.startsWith(FIXTURES_ROOT)) {
     res.writeHead(403, { "Content-Type": "text/plain" });
     res.end("Forbidden");
     return;
@@ -86,5 +87,10 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, BIND_ADDRESS, () => {
   console.log(`[fixture-server] Listening strictly on http://${BIND_ADDRESS}:${PORT}`);
-  console.log(`[fixture-server] Authorized route: http://${BIND_ADDRESS}:${PORT}/fc005/repository-visibility.html`);
+  console.log(
+    `[fixture-server] Authorized route: http://${BIND_ADDRESS}:${PORT}/fc005/repository-visibility.html`,
+  );
+  console.log(
+    `[fixture-server] Authorized route: http://${BIND_ADDRESS}:${PORT}/fc006/repository-visibility-interception.html`,
+  );
 });

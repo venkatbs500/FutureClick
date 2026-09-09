@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FutureClick FC-006: Repository Visibility Interception Fixture</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 40px auto;
+      max-width: 720px;
+      line-height: 1.6;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 0 20px;
+    }
+    .disclaimer-banner {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 24px;
+      color: #92400e;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    button {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .status-box {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="disclaimer-banner">
+    <strong>Synthetic FutureClick demonstration.</strong><br>
+    No real repository is being changed. Sprint 3 implements trusted interception,
+    consequence preview, Cancel, Stop, and trusted Continue with one-shot release
+    on this fixture only.
+  </div>
+
+  <h1>FutureClick FC-006 Interception Fixture</h1>
+  <p>Synthetic Repository Visibility Transition (Private &rarr; Public)</p>
+
+  <div class="card">
+    <h3>A. Valid Private &rarr; Public Transition</h3>
+    <p>
+      Declares exact FC-006 synthetic metadata. The consequential page mutation occurs
+      ONLY inside this button's target click handler.
+    </p>
+    <p id="repository-state" class="status-box">Repository visibility: private</p>
+    <button
+      type="button"
+      id="btn-change-visibility"
+      data-futureclick-fixture-contract="fc006.repository-visibility-interception.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Change Visibility to Public
+    </button>
+    <div class="status-box" id="page-handler-status">
+      Page handler executions: 0
+    </div>
+  </div>
+
+  <script>
+    let executionCount = 0;
+    const btn = document.getElementById("btn-change-visibility");
+    const statusBox = document.getElementById("page-handler-status");
+    const stateBox = document.getElementById("repository-state");
+
+    /**
+     * Optional harness nest probe: window.__fc006NestProbe?.(btn)
+     * Invoked during the authorized page handler for reentrancy tests.
+     */
+    btn.addEventListener("click", () => {
+      executionCount += 1;
+      statusBox.textContent = "Page handler executions: " + executionCount;
+      stateBox.textContent = "Repository visibility: public";
+      btn.setAttribute("data-futureclick-current-visibility", "public");
+      try {
+        const nest = window.__fc006NestProbe;
+        if (typeof nest === "function") {
+          nest(btn);
+        }
+      } catch (_err) {
+        /* nest probe errors must not break fixture counting */
+      }
+    });
+  </script>
+</body>
+</html>

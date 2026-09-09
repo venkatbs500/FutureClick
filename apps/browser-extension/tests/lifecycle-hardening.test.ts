@@ -54,15 +54,28 @@ describe("M6: Manifest Scope and Least Privilege", () => {
     }
   });
 
-  it("Probe 2: content_scripts match pattern is narrowed strictly to fixture route", () => {
-    expect(manifest.content_scripts.length).toBe(1);
-    const cs = manifest.content_scripts[0];
-    expect(cs).toBeDefined();
-    if (!cs) return;
-    expect(cs.matches).toEqual(["http://127.0.0.1/fc005/repository-visibility.html"]);
-    expect(cs.all_frames).toBe(false);
-    expect(cs.world).toBe("ISOLATED");
-    expect(cs.run_at).toBe("document_idle");
+  it("Probe 2: content_scripts match patterns are narrowed strictly to fixture routes", () => {
+    expect(manifest.content_scripts.length).toBe(2);
+
+    const fc005 = manifest.content_scripts[0];
+    expect(fc005).toBeDefined();
+    if (!fc005) return;
+    expect(fc005.matches).toEqual(["http://127.0.0.1/fc005/repository-visibility.html"]);
+    expect(fc005.js).toEqual(["content.bundle.js"]);
+    expect(fc005.all_frames).toBe(false);
+    expect(fc005.world).toBe("ISOLATED");
+    expect(fc005.run_at).toBe("document_idle");
+
+    const fc006 = manifest.content_scripts[1];
+    expect(fc006).toBeDefined();
+    if (!fc006) return;
+    expect(fc006.matches).toEqual([
+      "http://127.0.0.1/fc006/repository-visibility-interception.html",
+    ]);
+    expect(fc006.js).toEqual(["fc006-interception.bundle.js"]);
+    expect(fc006.all_frames).toBe(false);
+    expect(fc006.world).toBe("ISOLATED");
+    expect(fc006.run_at).toBe("document_start");
   });
 
   it("Probe 3: Bootstrap authorizes location BEFORE injecting UI or controller", () => {
@@ -661,5 +674,57 @@ describe("FC-005B End-to-End Hardening: Controller & Privacy Boundaries", () => 
         // Safe catch
       }
     }).not.toThrow();
+  });
+});
+
+describe("FC-006 Sprint 3: Narrow Continue + FC-005 passive invariants", () => {
+  it("FC-006 exposes only private Continue seam; no generic executors", async () => {
+    const { Fc006InterceptionController } = await import("../src/fc006/controller.js");
+    const { FC006_PREVIEW_COPY } = await import("../src/fc006/preview.js");
+    const controller = new Fc006InterceptionController({
+      ui: {
+        init() {},
+        getOwnedRoots: () => ({ hosts: [], shadowRoots: [] }),
+        getOwnedControls: () => [],
+        setActive() {},
+        showEvaluating() {},
+        showPreview() {},
+        showAbstention() {},
+        showStale() {},
+        beginContinuing() {},
+        clearDialog() {},
+      } as never,
+    });
+    const bag = controller as unknown as Record<string, unknown>;
+
+    expect(bag.continuePending).toBeUndefined();
+    expect(typeof bag.continuePendingSyntheticRepositoryAction).toBe("function");
+    expect(bag.releasePending).toBeUndefined();
+    expect(bag.executeAction).toBeUndefined();
+    expect(bag.replayAction).toBeUndefined();
+    expect(bag.clickSelector).toBeUndefined();
+    expect(bag.dispatchAction).toBeUndefined();
+    expect(bag.runDOMCommand).toBeUndefined();
+    expect(bag.performBrowserAction).toBeUndefined();
+    expect(typeof bag.handleCaptureClick).toBe("function");
+    expect(typeof bag.cancelPending).toBe("function");
+    expect(typeof bag.stop).toBe("function");
+    expect(JSON.stringify(FC006_PREVIEW_COPY)).not.toContain("Continue");
+  });
+
+  it("FC-005 content controller remains passive (no cancellation methods)", async () => {
+    const { BrowserExtensionController } = await import("../src/content/controller.js");
+    const controller = new BrowserExtensionController({
+      init() {},
+      setObserving() {},
+      renderVerifiedResult() {},
+      renderAbstention() {},
+      clearResult() {},
+    } as never);
+    const src = String(
+      (controller as unknown as { handleDocumentClick: unknown }).handleDocumentClick,
+    );
+    expect(src).not.toContain("preventDefault");
+    expect(src).not.toContain("stopImmediatePropagation");
   });
 });

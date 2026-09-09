@@ -7,28 +7,42 @@ import * as esbuild from "esbuild";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(__dirname, "..");
-const entryPoint = path.resolve(pkgRoot, "src/content/index.ts");
 const outdir = path.resolve(pkgRoot, "dist");
-const outfile = path.resolve(outdir, "content.bundle.js");
 
 fs.mkdirSync(outdir, { recursive: true });
 
-await esbuild.build({
-  entryPoints: [entryPoint],
-  outfile,
+const sharedBuildOptions = {
   bundle: true,
   format: "iife",
   target: "es2022",
   platform: "browser",
   sourcemap: false,
   minify: false,
+};
+
+const fc005Entry = path.resolve(pkgRoot, "src/content/index.ts");
+const fc005Outfile = path.resolve(outdir, "content.bundle.js");
+
+await esbuild.build({
+  ...sharedBuildOptions,
+  entryPoints: [fc005Entry],
+  outfile: fc005Outfile,
 });
 
-// Copy manifest.dev.json to dist/manifest.json for unpacked extension loading
+const fc006Entry = path.resolve(pkgRoot, "src/fc006/index.ts");
+const fc006Outfile = path.resolve(outdir, "fc006-interception.bundle.js");
+
+await esbuild.build({
+  ...sharedBuildOptions,
+  entryPoints: [fc006Entry],
+  outfile: fc006Outfile,
+});
+
 const manifestSrc = path.resolve(pkgRoot, "manifest.dev.json");
 const manifestDest = path.resolve(outdir, "manifest.json");
 if (fs.existsSync(manifestSrc)) {
   fs.copyFileSync(manifestSrc, manifestDest);
 }
 
-console.log("[build] Extension content script bundled successfully to:", outfile);
+console.log("[build] FC-005 content script bundled successfully to:", fc005Outfile);
+console.log("[build] FC-006 interception bundle successfully to:", fc006Outfile);
