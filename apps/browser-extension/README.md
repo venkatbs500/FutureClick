@@ -1,17 +1,26 @@
 # @futureclick/browser-extension
 
-Browser extension application placeholder for FutureClick.
+Browser extension application for FutureClick synthetic action observation (Sprint FC-005).
 
-## Eventual Responsibilities
+## Sprint FC-005 Scope & Architecture
 
-This application will provide human-centered consequence evaluation within web environments.
+Sprint FC-005 establishes FutureClick's first browser observation boundary. It is strictly **observation only**:
+- Passive, capture-phase event listening without calling `preventDefault()`, `stopPropagation()`, or `stopImmediatePropagation()`.
+- Synchronous metadata capture on supported native `<button type="button">` controls.
+- URL privacy: retains only origin and static route token; raw pathnames, query strings, and fragments are never captured.
+- Bridges allowlisted DOM metadata snapshots via `@futureclick/browser-adapter` into `@futureclick/consequence-engine`.
+- Minimal development indicator providing explicit Start/Stop toggles and synthetic consequence display.
 
-Planned capabilities:
-- Observe pending web actions (form submissions, button clicks, destructive dialog confirmations, permission requests).
-- Utilize standard browser extension APIs (WebExtensions / Manifest V3).
-- Utilize the Chrome DevTools Protocol (CDP) where appropriate for deeper state inspection, shadow DOM traversal, and network request interception.
-- Render non-invasive preview and consequence cards before irrevocable operations are executed.
+## Synthetic Honesty
 
-## Sprint FC-001 Scope
+- All evaluations in FC-005 are conducted on local synthetic fixtures (`http://127.0.0.1:4173/fc005/repository-visibility.html`).
+- No GitHub or live version control APIs are invoked.
+- No actual repositories are modified.
+- Page metadata is an explicit test declaration used to verify semantic grounding.
+- The `VERIFIED` consequence is a conditional deduction based on represented state and action parameters.
 
-This package is currently an architectural placeholder. Browser interception, DOM observers, background service workers, and UI components are strictly NOT implemented in this milestone.
+## Development Scripts
+
+- `pnpm --filter @futureclick/browser-extension build`: Compiles TypeScript and bundles the self-contained IIFE content script (`dist/content.bundle.js`).
+- `pnpm --filter @futureclick/browser-extension serve:fixtures`: Starts the local HTTP fixture server on `http://127.0.0.1:4173`.
+- `pnpm --filter @futureclick/browser-extension test`: Runs the Vitest test suite.

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FutureClick FC-005: Synthetic Repository Visibility Fixture</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 40px auto;
+      max-width: 720px;
+      line-height: 1.6;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 0 20px;
+    }
+    .disclaimer-banner {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 24px;
+      color: #92400e;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    button {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .status-box {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="disclaimer-banner">
+    <strong>Synthetic FutureClick demonstration.</strong><br>
+    No repository is changed. Results are conditional deductions from fixture metadata.
+  </div>
+
+  <h1>FutureClick FC-005 Test Fixture</h1>
+  <p>Synthetic Repository Visibility Transition (Private &rarr; Public)</p>
+
+  <!-- Button A: Valid private -> public -->
+  <div class="card">
+    <h3>A. Valid Private &rarr; Public Transition</h3>
+    <p>Declares valid synthetic metadata. Click handler records execution count on the page.</p>
+    <button
+      type="button"
+      id="btn-valid-visibility"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Change Visibility to Public
+    </button>
+    <div class="status-box" id="page-handler-status">
+      Page handler executions: 0
+    </div>
+  </div>
+
+  <!-- Button B: Missing current visibility -->
+  <div class="card">
+    <h3>B. Missing Current Visibility Metadata</h3>
+    <p>Missing current visibility declaration must yield INSUFFICIENT_EVIDENCE abstention.</p>
+    <button
+      type="button"
+      id="btn-missing-current-visibility"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-requested-visibility="public"
+    >
+      Change Visibility (Missing Current)
+    </button>
+  </div>
+
+  <!-- Button C: Unsupported visibility transition -->
+  <div class="card">
+    <h3>C. Unsupported Visibility Transition</h3>
+    <p>Unsupported current visibility ("internal") must not manufacture or default semantics.</p>
+    <button
+      type="button"
+      id="btn-unsupported-visibility"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="internal"
+      data-futureclick-requested-visibility="public"
+    >
+      Change Visibility (Internal &rarr; Public)
+    </button>
+  </div>
+
+  <!-- Button D: Unrelated operation -->
+  <div class="card">
+    <h3>D. Unrelated Operation</h3>
+    <p>Operation "repository.archive" does not belong to the visibility adapter.</p>
+    <button
+      type="button"
+      id="btn-unrelated-operation"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.archive"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Archive Repository
+    </button>
+  </div>
+
+  <!-- Button E: Text only, no metadata -->
+  <div class="card">
+    <h3>E. Text Only (No Metadata)</h3>
+    <p>Button label says "Make public" but has no data-futureclick-* attributes. Text alone is never trusted.</p>
+    <button
+      type="button"
+      id="btn-text-only"
+    >
+      Make public
+    </button>
+  </div>
+
+  <!-- Button F: Contenteditable Button -->
+  <div class="card">
+    <h3>F. Contenteditable Button</h3>
+    <p>Buttons with contenteditable="true" must be completely excluded from observation.</p>
+    <button
+      type="button"
+      id="btn-contenteditable"
+      contenteditable="true"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Editable Button
+    </button>
+  </div>
+
+  <!-- Button G: Deeply Nested Descendant (>4 hops) -->
+  <div class="card">
+    <h3>G. Deeply Nested Descendant (>4 hops)</h3>
+    <p>Targets with >4 ancestor hops to button must be rejected.</p>
+    <button
+      type="button"
+      id="btn-deep-parent"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      <span><span><span><span><span><span id="target-deep-descendant">Deep Click Target</span></span></span></span></span></span>
+    </button>
+  </div>
+
+  <!-- Button H: Secret-Prose Entity Key -->
+  <div class="card">
+    <h3>H. Secret-Prose Entity Key</h3>
+    <p>Hostile/secret entityKey must be rejected by machine grammar and never displayed.</p>
+    <button
+      type="button"
+      id="btn-secret-entity-key"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="PASSWORD=super-secret user@example.com"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Secret Key Button
+    </button>
+  </div>
+
+  <script>
+    let executions = 0;
+    const btn = document.getElementById("btn-valid-visibility");
+    const statusBox = document.getElementById("page-handler-status");
+    btn.addEventListener("click", () => {
+      executions++;
+      statusBox.textContent = "Page handler executions: " + executions;
+    });
+  </script>
+</body>
+</html>

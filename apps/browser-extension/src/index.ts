@@ -1,5 +1,5 @@
 /**
- * Browser extension foundation placeholder.
+ * Browser extension foundation for FutureClick (Sprint FC-005).
  * Architectural anchor for browser-specific state capture and preview overlays.
  */
 
@@ -16,3 +16,7 @@ export function getInitialExtensionConfig(): BrowserExtensionConfig {
     telemetryEnabled: false,
   };
 }
+
+export * from "./content/capture.js";
+export * from "./content/controller.js";
+export * from "./content/indicator.js";

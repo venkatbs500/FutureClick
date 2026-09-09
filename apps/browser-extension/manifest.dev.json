@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "FutureClick Development Extension",
+  "version": "0.1.0",
+  "description": "Development-only browser extension for FutureClick synthetic action observation (Sprint FC-005)",
+  "permissions": [],
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1/fc005/repository-visibility.html"],
+      "js": ["content.bundle.js"],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "world": "ISOLATED"
+    }
+  ]
+}

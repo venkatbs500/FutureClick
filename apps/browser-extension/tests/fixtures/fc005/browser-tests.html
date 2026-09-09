@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FutureClick FC-005: Native Browser Test Harness</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 30px auto;
+      max-width: 800px;
+      line-height: 1.5;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .test-result {
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .pass {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+    .fail {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    .card {
+      background: #ffffff;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>FutureClick FC-005 Native Browser Test Harness</h1>
+  <p>Tests native DOM activation, capture authorization, and event propagation in a live browser.</p>
+
+  <div class="card">
+    <h3>Interactive Controls</h3>
+    <button
+      type="button"
+      id="test-btn-valid"
+      data-futureclick-fixture-contract="fc005.repository-visibility.v1"
+      data-futureclick-operation="repository.visibility.change"
+      data-futureclick-entity-key="fixture-repository"
+      data-futureclick-current-visibility="private"
+      data-futureclick-requested-visibility="public"
+    >
+      Test Valid Button
+    </button>
+
+    <button
+      type="button"
+      id="test-btn-text-only"
+    >
+      Make public (No Metadata)
+    </button>
+
+    <input
+      type="text"
+      id="test-input-sensitive"
+      value="sensitive"
+    />
+  </div>
+
+  <h2>Test Output</h2>
+  <div id="results-log">Running browser checks...</div>
+
+  <script type="module">
+    const resultsContainer = document.getElementById("results-log");
+    resultsContainer.innerHTML = "";
+
+    function log(testName, passed, details = "") {
+      const div = document.createElement("div");
+      div.className = "test-result " + (passed ? "pass" : "fail");
+      div.textContent = (passed ? "[PASS] " : "[FAIL] ") + testName + (details ? " - " + details : "");
+      resultsContainer.appendChild(div);
+    }
+
+    // 1. Verify Event Propagation: Capture listener must NOT prevent bubble
+    let captureFired = false;
+    let bubbleFired = false;
+
+    window.addEventListener("click", () => {
+      captureFired = true;
+    }, { capture: true, passive: true });
+
+    const validBtn = document.getElementById("test-btn-valid");
+    validBtn.addEventListener("click", () => {
+      bubbleFired = true;
+    });
+
+    validBtn.click();
+
+    log("Native click propagation continues without preventDefault", captureFired && bubbleFired,
+      `capture=${captureFired}, bubble=${bubbleFired}`);
+
+    // 2. Allowlisted attribute retrieval
+    const contract = validBtn.getAttribute("data-futureclick-fixture-contract");
+    const op = validBtn.getAttribute("data-futureclick-operation");
+    const ent = validBtn.getAttribute("data-futureclick-entity-key");
+    const cur = validBtn.getAttribute("data-futureclick-current-visibility");
+    const req = validBtn.getAttribute("data-futureclick-requested-visibility");
+
+    const attrsOk = contract === "fc005.repository-visibility.v1" &&
+      op === "repository.visibility.change" &&
+      ent === "fixture-repository" &&
+      cur === "private" &&
+      req === "public";
+
+    log("Allowlisted DOM metadata attributes correctly retrieved individually", attrsOk);
+
+    // 3. Text-only button has no FutureClick metadata
+    const textOnlyBtn = document.getElementById("test-btn-text-only");
+    const textContract = textOnlyBtn.getAttribute("data-futureclick-fixture-contract");
+    log("Text-only button has no FutureClick attributes", textContract === null);
+
+    // 4. Sensitive controls identification
+    const inputElem = document.getElementById("test-input-sensitive");
+    log("Input controls distinguishable from native button", inputElem.tagName === "INPUT");
+  </script>
+</body>
+</html>

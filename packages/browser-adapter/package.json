@@ -1,8 +1,8 @@
 {
-  "name": "@futureclick/browser-extension",
+  "name": "@futureclick/browser-adapter",
   "version": "0.1.0",
   "private": true,
-  "description": "Browser extension application for FutureClick synthetic action observation",
+  "description": "Pure browser observation validation, privacy boundaries, and canonical context adaptation for FutureClick",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,21 +13,18 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/build.mjs",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "biome lint src tests",
-    "serve:fixtures": "node scripts/serve-fixtures.mjs"
+    "lint": "biome lint src tests"
   },
   "dependencies": {
     "@futureclick/action-schema": "workspace:*",
-    "@futureclick/browser-adapter": "workspace:*",
-    "@futureclick/consequence-engine": "workspace:*",
+    "@futureclick/privacy": "workspace:*",
     "@futureclick/shared": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "esbuild": "^0.28.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.7"
   }

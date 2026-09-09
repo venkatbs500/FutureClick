@@ -26,6 +26,12 @@ importers:
       '@futureclick/action-schema':
         specifier: workspace:*
         version: link:../../packages/action-schema
+      '@futureclick/browser-adapter':
+        specifier: workspace:*
+        version: link:../../packages/browser-adapter
+      '@futureclick/consequence-engine':
+        specifier: workspace:*
+        version: link:../../packages/consequence-engine
       '@futureclick/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -33,6 +39,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -99,6 +108,28 @@ importers:
 
   packages/action-schema:
     dependencies:
+      '@futureclick/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.2.7
+
+  packages/browser-adapter:
+    dependencies:
+      '@futureclick/action-schema':
+        specifier: workspace:*
+        version: link:../action-schema
+      '@futureclick/privacy':
+        specifier: workspace:*
+        version: link:../privacy
       '@futureclick/shared':
         specifier: workspace:*
         version: link:../shared

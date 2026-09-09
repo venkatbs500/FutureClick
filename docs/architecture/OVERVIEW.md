@@ -62,3 +62,7 @@ The canonical domain model (`@futureclick/action-schema`) and structural interme
 
 ### 8. Deterministic Verified Rules Engine (Sprint FC-004)
 Sprint FC-004 introduces FutureClick's first consequence-derivation mechanism: Deterministic Verified Rules (`@futureclick/consequence-engine`). Rules consume the authoritative `ActionEvaluationContext` and its structural `ActionGraph` to derive validated consequences under explicit scopes and assumptions. The engine enforces tri-state decision models (MATCHED, NOT_APPLICABLE, INSUFFICIENT_EVIDENCE), conservative conflict detection, and fail-closed abstention when evidence is incomplete. See `docs/architecture/DETERMINISTIC_RULE_ENGINE.md` for complete specification.
+
+### 9. Browser Observation & Adapter Foundation (Sprint FC-005)
+Sprint FC-005 establishes FutureClick's first browser observation boundary. The pure adapter layer (`@futureclick/browser-adapter`) validates and minimizes raw browser observations, strips URL queries/fragments, excludes sensitive controls, and maps explicit synthetic declarations into canonical evaluation contexts via trusted action adapters. The development extension (`apps/browser-extension`) captures passive DOM click events without cancellation (`preventDefault`), enabling end-to-end deduction of verified consequences on synthetic test fixtures. See `docs/architecture/BROWSER_ADAPTER.md` for complete specification.
+
