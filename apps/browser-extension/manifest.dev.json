@@ -18,6 +18,13 @@
       "run_at": "document_start",
       "all_frames": false,
       "world": "ISOLATED"
+    },
+    {
+      "matches": ["https://github.com/*/*/settings*"],
+      "js": ["fc007-observation.bundle.js"],
+      "run_at": "document_start",
+      "all_frames": false,
+      "world": "ISOLATED"
     }
   ]
 }

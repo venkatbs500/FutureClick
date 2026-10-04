@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FC-007 Synthetic GitHub Settings Visibility Fixture</title>
+  </head>
+  <body>
+    <main>
+      <h1>Repository settings (synthetic)</h1>
+      <ul>
+        <li id="visibility-section">
+          <h2>Change repository visibility</h2>
+          <div>This repository is currently private.</div>
+          <button type="button" id="open-visibility-dialog">Change visibility</button>
+        </li>
+      </ul>
+    </main>
+
+    <dialog id="visibility-dialog" aria-modal="true">
+      <button type="button" id="dialog-close" aria-label="Close">Close</button>
+      <h1>Make fixture-owner/fixture-repo public</h1>
+      <p>fixture-owner/fixture-repo</p>
+      <form
+        id="visibility-form"
+        method="post"
+        action="https://github.com/fixture-owner/fixture-repo/settings/set_visibility"
+        enctype="application/x-www-form-urlencoded"
+      >
+        <input type="hidden" name="authenticity_token" value="dummy-not-read" />
+        <button type="submit" id="final-make-public">Make this repository public</button>
+      </form>
+      <span>Make this repository public</span>
+      <span>Make this repository public</span>
+    </dialog>
+
+    <script>
+      // Fixture-side counters only. Never activates consequential controls for FutureClick.
+      window.__fc007FinalClickCount = 0;
+      window.__fc007TrustedClickCount = 0;
+      window.__fc007UntrustedClickCount = 0;
+      window.__fc007SubmitCount = 0;
+      window.__fc007RequestSubmitCount = 0;
+      window.__fc007FetchCount = 0;
+      window.__fc007XhrCount = 0;
+
+      (function instrumentFinalButton() {
+        const btn = document.getElementById("final-make-public");
+        if (!btn) return;
+        btn.addEventListener(
+          "click",
+          (e) => {
+            window.__fc007FinalClickCount = (window.__fc007FinalClickCount || 0) + 1;
+            if (e && e.isTrusted) {
+              window.__fc007TrustedClickCount = (window.__fc007TrustedClickCount || 0) + 1;
+            } else {
+              window.__fc007UntrustedClickCount = (window.__fc007UntrustedClickCount || 0) + 1;
+            }
+          },
+          true,
+        );
+      })();
+
+      (function instrumentRequestSubmit() {
+        const proto = HTMLFormElement.prototype;
+        if (typeof proto.requestSubmit !== "function") return;
+        const orig = proto.requestSubmit;
+        proto.requestSubmit = function (...args) {
+          window.__fc007RequestSubmitCount = (window.__fc007RequestSubmitCount || 0) + 1;
+          return orig.apply(this, args);
+        };
+      })();
+
+      window.__fc007OpenDialog = function () {
+        const d = document.getElementById("visibility-dialog");
+        if (d && typeof d.showModal === "function") {
+          d.showModal();
+        } else if (d) {
+          d.setAttribute("open", "");
+        }
+      };
+      window.__fc007CloseDialog = function () {
+        const d = document.getElementById("visibility-dialog");
+        if (d && typeof d.close === "function") {
+          d.close();
+        } else if (d) {
+          d.removeAttribute("open");
+        }
+      };
+      document.getElementById("open-visibility-dialog")?.addEventListener("click", () => {
+        window.__fc007OpenDialog();
+      });
+      document.getElementById("dialog-close")?.addEventListener("click", () => {
+        window.__fc007CloseDialog();
+      });
+      document.getElementById("visibility-form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        window.__fc007SubmitCount = (window.__fc007SubmitCount || 0) + 1;
+      });
+    </script>
+  </body>
+</html>

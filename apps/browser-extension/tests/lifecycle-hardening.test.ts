@@ -55,7 +55,7 @@ describe("M6: Manifest Scope and Least Privilege", () => {
   });
 
   it("Probe 2: content_scripts match patterns are narrowed strictly to fixture routes", () => {
-    expect(manifest.content_scripts.length).toBe(2);
+    expect(manifest.content_scripts.length).toBe(3);
 
     const fc005 = manifest.content_scripts[0];
     expect(fc005).toBeDefined();
@@ -76,6 +76,15 @@ describe("M6: Manifest Scope and Least Privilege", () => {
     expect(fc006.all_frames).toBe(false);
     expect(fc006.world).toBe("ISOLATED");
     expect(fc006.run_at).toBe("document_start");
+
+    const fc007 = manifest.content_scripts[2];
+    expect(fc007).toBeDefined();
+    if (!fc007) return;
+    expect(fc007.matches).toEqual(["https://github.com/*/*/settings*"]);
+    expect(fc007.js).toEqual(["fc007-observation.bundle.js"]);
+    expect(fc007.all_frames).toBe(false);
+    expect(fc007.world).toBe("ISOLATED");
+    expect(fc007.run_at).toBe("document_start");
   });
 
   it("Probe 3: Bootstrap authorizes location BEFORE injecting UI or controller", () => {

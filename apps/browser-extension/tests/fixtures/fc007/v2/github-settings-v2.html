@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FC-007 V2 Synthetic GitHub Settings Fixture</title>
+  </head>
+  <body>
+    <main id="fc007-main"></main>
+
+    <dialog id="empty-dialog-0"></dialog>
+    <dialog id="empty-dialog-1"></dialog>
+    <dialog id="empty-dialog-2"></dialog>
+
+    <dialog id="visibility-dialog" aria-modal="true"></dialog>
+
+    <script>
+      window.__fc007FinalClickCount = 0;
+      window.__fc007TrustedClickCount = 0;
+      window.__fc007UntrustedClickCount = 0;
+      window.__fc007SubmitCount = 0;
+      window.__fc007RequestSubmitCount = 0;
+      window.__fc007FetchCount = 0;
+      window.__fc007XhrCount = 0;
+
+      const OWNER = "fixture-owner";
+      const REPO = "fixture-repo";
+      const LEADING_PADDING = 520;
+
+      function buildLiveShapedMain() {
+        const main = document.getElementById("fc007-main");
+        if (!main) return;
+
+        for (let i = 0; i < LEADING_PADDING; i += 1) {
+          main.appendChild(document.createElement("span"));
+        }
+
+        const ul = document.createElement("ul");
+        const li = document.createElement("li");
+        li.id = "visibility-section";
+
+        const titleWrap = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = "Change repository visibility";
+        titleWrap.appendChild(strong);
+        li.appendChild(titleWrap);
+
+        const privateWrap = document.createElement("div");
+        const priv = document.createElement("div");
+        priv.textContent = "This repository is currently private.";
+        privateWrap.appendChild(priv);
+        li.appendChild(privateWrap);
+
+        const focusGroup = document.createElement("focus-group");
+        const actionMenu = document.createElement("action-menu");
+        const btnWrap = document.createElement("div");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.id = "open-visibility-dialog";
+        const span = document.createElement("span");
+        span.textContent = "Change visibility";
+        button.appendChild(span);
+        btnWrap.appendChild(button);
+        actionMenu.appendChild(btnWrap);
+        focusGroup.appendChild(actionMenu);
+        li.appendChild(focusGroup);
+
+        ul.appendChild(li);
+        main.appendChild(ul);
+
+        for (let i = 0; i < 80; i += 1) {
+          const p = document.createElement("p");
+          p.textContent =
+            "Dense filler prose block " +
+            i +
+            " with enough characters to exceed V1 broad text charging when normalized own-text runs on every element.";
+          main.appendChild(p);
+        }
+      }
+
+      function stageInner(stage) {
+        const heading = "<h1>Make " + OWNER + "/" + REPO + " public</h1>";
+        const identity = "<p>" + OWNER + "/" + REPO + "</p>";
+        const effects =
+          '<div role="region" aria-label="Effects of making this repository public" tabindex="-1"><p>Repository will become public.</p></div>';
+        if (stage === "b") {
+          return (
+            heading +
+            identity +
+            '<button type="button" id="stage-b-ack">I want to make this repository public</button>'
+          );
+        }
+        if (stage === "c") {
+          return (
+            heading +
+            identity +
+            effects +
+            '<button type="button" id="stage-c-ack">I have read and understand these effects</button>'
+          );
+        }
+        if (stage === "d") {
+          return (
+            heading +
+            identity +
+            effects +
+            '<form id="visibility-form" method="post" action="https://github.com/' +
+            OWNER +
+            "/" +
+            REPO +
+            '/settings/set_visibility" enctype="application/x-www-form-urlencoded">' +
+            '<input type="hidden" name="authenticity_token" value="" />' +
+            '<input type="hidden" name="confirmed" value="" />' +
+            '<input type="hidden" name="visibility" value="" />' +
+            '<button type="button" id="dialog-close" aria-label="Close">Close</button>' +
+            '<button type="submit" id="final-make-public">Make this repository public</button>' +
+            "</form>"
+          );
+        }
+        return "";
+      }
+
+      window.__fc007SetStage = function (stage) {
+        const dialog = document.getElementById("visibility-dialog");
+        if (!dialog) return;
+        dialog.innerHTML = stageInner(stage || "d");
+        if (stage === "a") {
+          dialog.removeAttribute("open");
+          dialog.open = false;
+          return;
+        }
+        if (typeof dialog.showModal === "function") {
+          dialog.showModal();
+        } else {
+          dialog.setAttribute("open", "");
+          dialog.open = true;
+        }
+      };
+
+      buildLiveShapedMain();
+      // Default Stage A (no modal). Harness must call __fc007SetStage explicitly.
+      window.__fc007SetStage("a");
+
+      (function instrumentFinalButton() {
+        document.addEventListener(
+          "click",
+          (e) => {
+            const btn = document.getElementById("final-make-public");
+            if (!btn || e.target !== btn) return;
+            window.__fc007FinalClickCount = (window.__fc007FinalClickCount || 0) + 1;
+            if (e.isTrusted) {
+              window.__fc007TrustedClickCount = (window.__fc007TrustedClickCount || 0) + 1;
+            } else {
+              window.__fc007UntrustedClickCount = (window.__fc007UntrustedClickCount || 0) + 1;
+            }
+          },
+          true,
+        );
+      })();
+
+      window.__fc007OpenDialog = function () {
+        window.__fc007SetStage("d");
+      };
+    </script>
+  </body>
+</html>

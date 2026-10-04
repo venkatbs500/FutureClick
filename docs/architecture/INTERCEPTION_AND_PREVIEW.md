@@ -161,3 +161,30 @@ Permissions remain `[]`. No `host_permissions`.
 ## Honest Product Claim (Sprint 3)
 
 While interception is active (`observing`+) on the controlled FC-006 fixture, an eligible trusted human activation of the exact private→public control is stopped before the fixture's consequential target handler executes, and FutureClick shows a deterministic consequence preview. The user may Cancel, Stop, or trusted-Continue. On valid Continue, FutureClick issues **at most one** authorized continuation activation via the captured native button click method on the exact stored pending element. Nested activations during release remain blocked.
+
+## FC-007 Interception Boundary (GitHub Stage-D visibility confirmation)
+
+FC-007 is a consequence-aware interception boundary for the **recognized consequential click
+surface**: the Stage-D final confirmation button of the GitHub repository visibility dialog, as
+recognized by the V2 contract.
+
+Guarantees:
+
+| Topic | Guarantee |
+| --- | --- |
+| Human activation | Once the current Stage-D surface is recognized, a later human activation of its final button (or a descendant) is intercepted and previewed; the page's default action does not run. |
+| Page-generated activation | `click()`, `dispatchEvent` (cancelable or not), descendant activation, and `requestSubmit(finalButton)` targeting the guarded button are blocked, before and after a decision, and in terminal states. |
+| Re-render | A Stage-D re-render while VERIFIED or while evaluation is pending destroys the old decision/evaluation, ignores stale async results, re-runs full recognition once, and moves the guard to the current button. The old detached button stays blocked. |
+| Continue | One trusted Continue permits **at most one** guarded consequential submit — exactly one on the normal path — from the authorized generated click's default action. Nested activations or `requestSubmit(finalButton)` inside page handlers during that dispatch are blocked. Unrelated forms are unaffected. |
+| Authority | Extension-private, in-memory state only: no DOM attributes, page globals, event markers, or public tokens. Event object identity is diagnostic, not authority. |
+
+Out of scope (FC-007 does **not** prevent):
+
+- hostile page JavaScript calling `form.submit()`;
+- hostile page JavaScript calling `requestSubmit()` without the guarded button as submitter;
+- the page issuing its own network requests (`fetch`, XHR, beacons, navigations);
+- the page replacing the Stage-D surface **and** programmatically activating the replacement in
+  the same JavaScript task, before mutation-observer delivery lets FutureClick re-recognize it.
+
+These limits concern page-script actions FutureClick cannot observe as a click on the recognized
+surface. They do not weaken the human-activation guarantee above.

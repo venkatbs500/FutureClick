@@ -32,6 +32,10 @@ const ALLOWED_ROUTES = new Map([
     "/fc006/repository-visibility-interception.html",
     path.join("fc006", "repository-visibility-interception.html"),
   ],
+  [
+    "/fc007/github-settings-visibility.html",
+    path.join("fc007", "github-settings-visibility.html"),
+  ],
 ]);
 
 const server = http.createServer((req, res) => {
