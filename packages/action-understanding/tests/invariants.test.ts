@@ -6,7 +6,11 @@
  * invariant the code enforces.
  */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { RAW_SURFACE_FORBIDDEN_KEYS } from "../src/surface.js";
 import {
   FC008_INVARIANT_COUNT,
   FC008_INVARIANTS,
@@ -100,18 +104,93 @@ describe("the AI invariant identities are frozen", () => {
 });
 
 describe("deferred invariants are reported as deferred, not as passing", () => {
-  it("marks the sanitizer-dependent invariant AI-4 as not yet enforced", () => {
-    // The real sanitizer is a Sprint 2 component, so Sprint 1 cannot claim it.
-    expect(getInvariant("AI-4")?.status).toBe("deferred");
+  it("advances AI-4 to pass now that the sanitizer exists", () => {
+    // Sprint 1 reported this `deferred`, correctly: there was no sanitizer whose
+    // ordering could be enforced. Sprint 2 ships one, so the status advances and
+    // `statusSince` records which sprint earned it.
+    expect(getInvariant("AI-4")?.status).toBe("pass");
+    expect(getInvariant("AI-4")?.statusSince).toBe("sprint-2");
+  });
+
+  it("advances AI-7 to pass now the adversarial corpus and extractor exist", () => {
+    expect(getInvariant("AI-7")?.status).toBe("pass");
+    expect(getInvariant("AI-7")?.statusSince).toBe("sprint-2");
   });
 
   it("marks the Sprint 5 research indicator AI-23 as deferred", () => {
     expect(getInvariant("AI-23")?.status).toBe("deferred");
   });
 
-  it("marks extractor-dependent and training-environment invariants as partial", () => {
-    expect(getInvariant("AI-7")?.status).toBe("partial-structural");
+  it("keeps AI-18 partial until the offline training environment exists", () => {
+    // Sprint 2 separated the fitting path into the offline package, which strengthens
+    // one side. The Python training environment is Sprint 3, so this is not a pass.
     expect(getInvariant("AI-18")?.status).toBe("partial-structural");
+    expect(getInvariant("AI-18")?.basis).toMatch(/Sprint 3/);
+  });
+
+  it("keeps the documented forbidden-key count equal to the frozen list", () => {
+    // The reported defect: the architecture document said 45 while the list held 46.
+    // The invariant basis now interpolates the length, so it cannot drift; this checks
+    // the markdown, which cannot interpolate anything and therefore can.
+    const docPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+      "..",
+      "docs",
+      "architecture",
+      "FUTUREBENCH_SPRINT2.md",
+    );
+    const doc = readFileSync(docPath, "utf8");
+    const actual = RAW_SURFACE_FORBIDDEN_KEYS.length;
+    const claims = [...doc.matchAll(/(\d+)\s+forbidden raw-surface keys/g)].map((m) => m[1]);
+    const nameClaims = [...doc.matchAll(/RAW_SURFACE_FORBIDDEN_KEYS` names (\d+)/g)].map(
+      (m) => m[1],
+    );
+    expect(claims.length + nameClaims.length).toBeGreaterThan(0);
+    for (const claim of [...claims, ...nameClaims]) {
+      expect(Number(claim)).toBe(actual);
+    }
+    expect(getInvariant("AI-22")?.basis).toContain(`${actual} forbidden keys`);
+  });
+
+  it("records a milestone for every invariant, and only known milestones", () => {
+    for (const entry of FC008_INVARIANTS) {
+      expect(["sprint-1", "sprint-2"]).toContain(entry.statusSince);
+    }
+  });
+
+  it("has exactly the Sprint-2 expected status for all 24 invariants", () => {
+    // The whole table in one assertion, so a silent status drift in either direction
+    // fails here rather than being noticed by a reviewer reading prose.
+    const expected: Record<string, string> = {
+      "AI-1": "pass",
+      "AI-2": "pass",
+      "AI-3": "pass",
+      "AI-4": "pass",
+      "AI-5": "pass",
+      "AI-6": "pass",
+      "AI-7": "pass",
+      "AI-8": "pass",
+      "AI-9": "pass",
+      "AI-10": "pass",
+      "AI-11": "pass",
+      "AI-12": "pass",
+      "AI-13": "pass",
+      "AI-14": "pass",
+      "AI-15": "pass",
+      "AI-16": "pass",
+      "AI-17": "pass",
+      "AI-18": "partial-structural",
+      "AI-19": "pass",
+      "AI-20": "pass",
+      "AI-21": "pass",
+      "AI-22": "pass",
+      "AI-23": "deferred",
+      "AI-24": "pass",
+    };
+    const actual = Object.fromEntries(FC008_INVARIANTS.map((entry) => [entry.id, entry.status]));
+    expect(actual).toEqual(expected);
   });
 
   it("claims a pass only for invariants the shipped surface actually satisfies", () => {

@@ -536,6 +536,12 @@ as passing would make the table worthless as evidence, so it is not done.
 
 ### The invariants
 
+Status below is **as of Sprint 1**. Sprint 2 built the sanitizer and extractor
+these entries were waiting on and upgraded AI-4 and AI-7; see
+[FUTUREBENCH_SPRINT2.md](./FUTUREBENCH_SPRINT2.md) §14 for the current table. The
+Sprint-1 column is kept rather than overwritten so the reason each entry was not a
+pass at freeze time remains readable.
+
 | ID | Invariant | Sprint 1 status |
 |---|---|---|
 | **AI-1** | Observation and hypothesis are inert serializable deeply-frozen data. No live DOM/capability/function references. | PASS |
@@ -569,12 +575,16 @@ as passing would make the table worthless as evidence, so it is not done.
   sanitizer version and a redaction record, but **the real sanitizer is a
   Sprint 2 component**. Sprint 1 ships no sanitizer, so there is nothing whose
   ordering could be enforced. Claiming a pass here would be claiming a property
-  of code that does not exist.
+  of code that does not exist. *(Sprint 2: now PASS —
+  `packages/privacy/src/text-sanitizer.ts` is the sole authority, and the single
+  fingerprint call site is positioned after it.)*
 - **AI-7 — PARTIAL (STRUCTURAL).** Layer B is a closed grammar of bounded
   categoricals and tokens with no free-text field, and the provider receives
   Layer B alone, so page content structurally cannot arrive as an instruction.
   Full enforcement nonetheless depends on the **Sprint 2 extractor and
-  sanitizer** that will produce Layer B from a real page.
+  sanitizer** that will produce Layer B from a real page. *(Sprint 2: now PASS
+  within synthetic scope — differential tests over injected instructions show the
+  label, policy, caps, and support matrix all unchanged.)*
 - **AI-18 — PARTIAL (STRUCTURAL).** The package manifest contains no training
   dependency and a closed allowlist test enforces that. The **offline training
   environment is a Sprint 3 deliverable**, so the separation is currently
@@ -602,8 +612,11 @@ layers, in `tests/isolation.test.ts`:
 1. **Closed manifest allowlist** — every declared dependency is named
    explicitly, and peer and optional dependencies must be empty.
 2. **Closed import allowlist** — every specifier in `src` must be relative or one
-   of the two inert contract packages, and computed or dynamic specifiers are
-   forbidden so the scan is provably complete.
+   of the inert contract packages, and computed or dynamic specifiers are
+   forbidden so the scan is provably complete. The allowlist itself is the
+   authority on which packages those are; stating a count here only created a
+   second place to keep in sync, and it fell out of sync the moment the third was
+   added.
 3. **Closed public-export allowlist** — all 139 exported names are enumerated, so
    the public surface cannot grow unnoticed.
 4. **Built-package inspection** — the package is compiled into a temporary

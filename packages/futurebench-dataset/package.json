@@ -1,8 +1,8 @@
 {
-  "name": "@futureclick/action-understanding",
+  "name": "@futureclick/futurebench-dataset",
   "version": "0.1.0",
   "private": true,
-  "description": "Inert PREDICTED action-understanding contracts, trust boundary, and runtime policy for FutureClick",
+  "description": "Offline synthetic FutureBench dataset foundation for FC-008: scenarios, specificity oracle, records, partitions, leakage audits, and hashed manifests",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,11 +20,13 @@
   },
   "dependencies": {
     "@futureclick/action-schema": "workspace:*",
+    "@futureclick/action-understanding": "workspace:*",
     "@futureclick/privacy": "workspace:*",
     "@futureclick/shared": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@types/node": "^20.11.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.7"
   }

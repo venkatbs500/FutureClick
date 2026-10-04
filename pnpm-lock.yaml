@@ -133,6 +133,9 @@ importers:
       '@futureclick/action-schema':
         specifier: workspace:*
         version: link:../action-schema
+      '@futureclick/privacy':
+        specifier: workspace:*
+        version: link:../privacy
       '@futureclick/shared':
         specifier: workspace:*
         version: link:../shared
@@ -184,6 +187,34 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.2.7(@types/node@20.19.43)(happy-dom@18.0.1)
+
+  packages/futurebench-dataset:
+    dependencies:
+      '@futureclick/action-schema':
+        specifier: workspace:*
+        version: link:../action-schema
+      '@futureclick/action-understanding':
+        specifier: workspace:*
+        version: link:../action-understanding
+      '@futureclick/privacy':
+        specifier: workspace:*
+        version: link:../privacy
+      '@futureclick/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.43
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

@@ -61,7 +61,13 @@ const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf
 };
 
 /** Every runtime dependency FC-008 Sprint 1 is permitted to declare. */
-const ALLOWED_RUNTIME_DEPENDENCIES = ["@futureclick/action-schema", "@futureclick/shared"];
+const ALLOWED_RUNTIME_DEPENDENCIES = [
+  "@futureclick/action-schema",
+  // Sprint 2. The privacy package is the sole sanitization authority and is itself
+  // inert: pure functions over strings, no capability, no network, no DOM.
+  "@futureclick/privacy",
+  "@futureclick/shared",
+];
 
 /** Every development dependency, which ships in no bundle. */
 const ALLOWED_DEV_DEPENDENCIES = ["@biomejs/biome", "typescript", "vitest"];
@@ -127,6 +133,62 @@ const sourceFiles = listFiles(sourceRoot, ".ts");
  * `from` inside a string literal (as in `fields.get("from")`) is mistaken for
  * an import clause and the scan reports nonsense specifiers.
  */
+/**
+ * Removes comments while preserving string literals.
+ *
+ * A single-pass state machine rather than a regex: a naive `//.*$` strip would
+ * also eat the tail of any string containing `//`, and stripping string literals
+ * (as `codeOnly` does) would destroy the specifiers this scan is looking for.
+ * Needed because prose in a doc comment can legitimately contain the word `from`
+ * followed by a quoted phrase, which the specifier patterns would otherwise read
+ * as an import.
+ */
+function withoutComments(text: string): string {
+  let out = "";
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i] as string;
+    const next = text[i + 1];
+    if (ch === "/" && next === "/") {
+      while (i < text.length && text[i] !== "\n") {
+        i += 1;
+      }
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < text.length && !(text[i] === "*" && text[i + 1] === "/")) {
+        i += 1;
+      }
+      i += 2;
+      out += " ";
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const quote = ch;
+      out += ch;
+      i += 1;
+      while (i < text.length) {
+        const inner = text[i] as string;
+        out += inner;
+        i += 1;
+        if (inner === "\\") {
+          out += text[i] ?? "";
+          i += 1;
+          continue;
+        }
+        if (inner === quote) {
+          break;
+        }
+      }
+      continue;
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
+
 function collectSpecifiers(text: string): string[] {
   const patterns = [
     /(?<!["'\w])from\s*["']([^"']+)["']/g,
@@ -134,9 +196,10 @@ function collectSpecifiers(text: string): string[] {
     /(?<!["'\w])import\s*\(\s*["']([^"']+)["']\s*\)/g,
     /(?<!["'\w])require\s*\(\s*["']([^"']+)["']\s*\)/g,
   ];
+  const scanned = withoutComments(text);
   const found: string[] = [];
   for (const pattern of patterns) {
-    for (const match of text.matchAll(pattern)) {
+    for (const match of scanned.matchAll(pattern)) {
       found.push(match[1] as string);
     }
   }
@@ -173,10 +236,17 @@ const sourceSpecifiers = [
   ...new Set(sourceFiles.flatMap((path) => collectSpecifiers(readFileSync(path, "utf8")))),
 ].sort();
 
-describe("src imports only relative modules and the two inert contract packages", () => {
+describe("src imports only relative modules and the inert contract packages", () => {
   it("found specifiers to inspect", () => {
     expect(sourceFiles.length).toBeGreaterThanOrEqual(15);
     expect(sourceSpecifiers.length).toBeGreaterThan(0);
+  });
+
+  it("states how many contract packages the allowlist actually permits", () => {
+    // The title used to say "two", which was true until Sprint 2 added the privacy
+    // package. Asserting the size here means the count cannot silently drift again,
+    // and the title no longer carries a number that has to be maintained by hand.
+    expect(ALLOWED_RUNTIME_DEPENDENCIES).toHaveLength(3);
   });
 
   it("resolves every specifier to a relative module or an allowed package", () => {
@@ -230,18 +300,25 @@ const ALLOWED_EXPORTS = [
   "ACTION_HYPOTHESIS_SCHEMA_VERSION",
   "ACTION_OBSERVATION_SCHEMA_VERSION",
   "ALLOWED_PRIMARY_FEATURE_FAMILIES",
+  "ARTIFACT_IDENTITY_FIELDS",
   "CALIBRATION_METHOD",
+  "CHANNEL_FILL_ORDER",
   "CONTROL_KINDS",
   "CONTROL_ROLES",
   "DISPLAY_RETENTION_POLICY",
   "EPISTEMIC_ABSTENTION_REASONS",
+  "EXTRACTION_REFUSALS",
   "FAILURE_REASONS",
   "FAILURE_STAGES",
   "FC008_BOUNDS_VERSION",
+  "FC008_DATASET_PARTITIONS",
   "FC008_EVIDENCE_MODE",
+  "FC008_EXTRACTOR_ID",
+  "FC008_EXTRACTOR_VERSION",
   "FC008_FEATURE_POLICY",
   "FC008_FEATURE_POLICY_VERSION",
   "FC008_FINGERPRINT_VERSION",
+  "FC008_FITTABLE_PARTITION",
   "FC008_ID_REGEX",
   "FC008_INVARIANTS",
   "FC008_INVARIANT_COUNT",
@@ -255,8 +332,11 @@ const ALLOWED_EXPORTS = [
   "FC008_MATRIX_VERB_COUNT",
   "FC008_MEASURE_THEN_FREEZE_TARGETS",
   "FC008_MODEL_FAMILIES",
+  "FC008_PARTITION_RULES",
   "FC008_PRECEDENCE",
   "FC008_PRECEDENCE_STEP_COUNT",
+  "FC008_PROJECTOR_ID",
+  "FC008_PROJECTOR_VERSION",
   "FC008_SAFETY_CAPS",
   "FC008_SPECIFICITY_ORACLE_EXAMPLE",
   "FC008_SPECIFICITY_ORACLE_RULE",
@@ -273,9 +353,6 @@ const ALLOWED_EXPORTS = [
   "INTERACTION_KINDS",
   "InferenceDeadline",
   "LOCALE_TAG_REGEX",
-  "ARTIFACT_IDENTITY_FIELDS",
-  "artifactIdentityDivergence",
-  "artifactIdentityMatches",
   "MAX_ABSOLUTE_LOGIT",
   "MAX_FAILURE_MEASUREMENT",
   "MAX_FRESHNESS_COUNTER",
@@ -296,6 +373,7 @@ const ALLOWED_EXPORTS = [
   "PROHIBITED_PRIMARY_FEATURE_INPUTS",
   "PROVIDER_DIAGNOSTICS",
   "PROVIDER_OUTCOME_STATUSES",
+  "RAW_SURFACE_FORBIDDEN_KEYS",
   "REQUIRED_SEMANTIC_FEATURE_GROUPS",
   "REQUIRED_SEMANTIC_FEATURE_GROUP_COUNT",
   "SHA256_HEX_REGEX",
@@ -305,14 +383,18 @@ const ALLOWED_EXPORTS = [
   "SURFACE_KINDS",
   "TOKEN_CHANNELS",
   "UNDERSTANDING_OUTCOMES",
+  "artifactIdentityDivergence",
+  "artifactIdentityMatches",
   "assertUnreachableOutcome",
   "assessSupport",
+  "buildObservationFromSurface",
   "captureBoundedArray",
   "classIndexToNumber",
   "classNumberToIndex",
   "collectReachableKeys",
   "computeFeatureCoverage",
   "computeObservationInputFingerprint",
+  "countBucket",
   "countUnknownCategoricals",
   "createAbstainedResult",
   "createEphemeralDisplayContext",
@@ -322,7 +404,9 @@ const ALLOWED_EXPORTS = [
   "createNullScoringProvider",
   "createProviderScoringContext",
   "createScriptedClock",
+  "enumerateCandidateFeatures",
   "evaluateObservation",
+  "extractObservationSemantics",
   "findNonInertPath",
   "findSupportMatrixEntry",
   "findUnfrozenPath",
@@ -343,12 +427,16 @@ const ALLOWED_EXPORTS = [
   "isHypothesisResult",
   "isOperationalFailureCode",
   "isSupportedTuple",
+  "isFittablePartition",
   "isWithinStringCaps",
   "issue",
+  "nameLikeText",
   "outcomeForSupportCheck",
+  "partitionRule",
   "participatesInSelectiveStatistics",
   "precedenceStepForEpistemicReason",
   "precedenceStepForOperationalCode",
+  "projectPrimaryFeatures",
   "readBoolean",
   "readBoundedInteger",
   "readBoundedNumber",
@@ -357,6 +445,9 @@ const ALLOWED_EXPORTS = [
   "representedRequiredGroups",
   "resolveSupportedTuple",
   "safeFormatValue",
+  "semanticText",
+  "stateFeatureName",
+  "structuralCountFeatureName",
   "supportedTupleKey",
   "tokenFeatureName",
   "utf8ByteLength",
@@ -368,6 +459,7 @@ const ALLOWED_EXPORTS = [
   "validateProviderOutcome",
   "verifyInvariantNumbering",
   "verifyOutcomeMapping",
+  "verifyPartitionRules",
   "verifySupportMatrixIntegrity",
 ];
 
@@ -484,7 +576,7 @@ describe("the built package carries no capability", () => {
     expect(emitted.some((f) => f.path.endsWith("runtime.js"))).toBe(true);
   });
 
-  it("imports only relative modules and the two allowed packages", () => {
+  it("imports only relative modules and the allowed packages", () => {
     for (const file of emitted) {
       for (const specifier of collectSpecifiers(file.text)) {
         const allowed =

@@ -155,9 +155,12 @@ describe("ActionGraph isolation", () => {
 });
 
 describe("the package depends only on inert contract packages", () => {
-  it("declares exactly the two workspace dependencies", () => {
+  it("declares exactly the three workspace dependencies", () => {
+    // Sprint 2 adds the privacy package, which is itself inert: pure functions
+    // over strings, with no capability, no network, and no DOM.
     expect(Object.keys(manifest.dependencies ?? {}).sort()).toEqual([
       "@futureclick/action-schema",
+      "@futureclick/privacy",
       "@futureclick/shared",
     ]);
   });
