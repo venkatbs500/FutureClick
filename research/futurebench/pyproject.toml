@@ -4,7 +4,15 @@ version = "0.1.0"
 description = "FutureClick benchmark evaluation dataset and harness"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+# FC-008 Sprint 3 reference training. NumPy and scikit-learn only; SciPy, joblib, and
+# threadpoolctl arrive as scikit-learn's own requirements rather than as choices made
+# here. Deliberately absent: PyTorch, TensorFlow, JAX, ONNX Runtime, and every hosted
+# inference SDK. A 429-row corpus with 370 features needs none of them, and any remote
+# SDK would give offline research code a network capability it must not have.
+dependencies = [
+    "numpy>=2.1,<3",
+    "scikit-learn>=1.6,<2",
+]
 
 [dependency-groups]
 dev = [

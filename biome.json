@@ -13,7 +13,9 @@
       "**/node_modules/**",
       "**/.turbo/**",
       "**/coverage/**",
-      "**/pnpm-lock.yaml"
+      "**/pnpm-lock.yaml",
+      "research/futurebench/artifacts/**",
+      "research/futurebench/data/**"
     ]
   },
   "formatter": {

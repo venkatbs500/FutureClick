@@ -28,6 +28,19 @@ python_version = "3.12"
 strict = true
 warn_unused_configs = true
 
+# scikit-learn and its transitive dependencies ship no py.typed marker, so strict mode
+# cannot see into them. The exemption is listed module by module rather than set
+# globally with ignore_missing_imports, so a genuinely mistyped first-party import
+# still fails instead of being absorbed by a blanket rule.
+[[tool.mypy.overrides]]
+module = [
+    "joblib.*",
+    "scipy.*",
+    "sklearn.*",
+    "threadpoolctl.*",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
 pythonpath = [

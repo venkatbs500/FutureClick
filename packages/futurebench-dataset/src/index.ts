@@ -12,6 +12,7 @@ export * from "./audit.js";
 export * from "./authoring.js";
 export * from "./canonical.js";
 export * from "./dataset.js";
+export * from "./export.js";
 export * from "./manifest.js";
 export * from "./oracle.js";
 export * from "./partition.js";
