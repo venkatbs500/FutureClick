@@ -40,12 +40,13 @@
  * make correct temperature calibration impossible to define later, and would
  * make unsupported-combination mass uncomputable.
  *
- * Composition numerics are a Sprint 3 deliverable. A valid factorized payload is
- * therefore accepted and validated here in full, and the runtime then declines to
- * compose it, returning the operational result `MODEL_UNAVAILABLE` with the
- * bounded categorical detail `composition` / `composition-not-implemented`. The
- * refusal is operational rather than epistemic because an unimplemented
- * composition is a system limitation, not a statement about input difficulty.
+ * Composition stays runtime-owned. A valid factorized payload is accepted and
+ * validated here in full; the runtime composes the 13 supported tuples when the
+ * frozen mapping is supplied. Without that mapping the runtime still returns
+ * the operational result `MODEL_UNAVAILABLE` with the bounded categorical
+ * detail `composition` / `composition-not-implemented`. The refusal is
+ * operational rather than epistemic because unimplemented composition is a
+ * system limitation, not a statement about input difficulty.
  */
 
 import { FC008_FEATURE_POLICY_VERSION } from "./feature-policy.js";

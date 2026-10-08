@@ -431,6 +431,7 @@ export interface RuntimeDepsOverrides {
   readonly vocabulary?: FeatureVocabulary | null;
   readonly researchMode?: boolean;
   readonly idGenerator?: IdGenerator;
+  readonly factorizedComposition?: UnderstandingRuntimeDeps["factorizedComposition"];
 }
 
 export function buildRuntimeDeps(overrides: RuntimeDepsOverrides = {}): UnderstandingRuntimeDeps {
@@ -446,6 +447,9 @@ export function buildRuntimeDeps(overrides: RuntimeDepsOverrides = {}): Understa
     now: () => TEST_TIMESTAMP,
     idGenerator: overrides.idGenerator ?? createDeterministicIdGenerator("test"),
     researchMode: overrides.researchMode ?? false,
+    ...(overrides.factorizedComposition === undefined
+      ? {}
+      : { factorizedComposition: overrides.factorizedComposition }),
   };
 }
 

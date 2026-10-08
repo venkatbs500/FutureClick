@@ -11,18 +11,15 @@
  * FC-007 module. Current-state ownership is injected through
  * `FreshnessValidator`; time is injected through `RuntimeClock`.
  *
- * Sprint 1 ships the CALIBRATOR INTERFACE but no calibrator implementation, and
- * no factorized composition. The numeric transforms (softmax, temperature,
- * factorized renormalisation onto the supported set) land in Sprint 3 and
- * Sprint 4 together with the golden Python/TypeScript parity vectors that are
- * the only honest way to validate them.
+ * Sprint 5A owns factorized composition and temperature calibration on the
+ * runtime side. Providers still return raw 13-tuple or 10/9/10 logits only.
  */
 
 import type { ConfidenceScore } from "@futureclick/action-schema";
 import type { IdGenerator, IsoTimestamp } from "@futureclick/shared";
 import { FC008_SAFETY_CAPS } from "./bounds.js";
+import { type FailureReason, type FailureStage, createFailureDetail } from "./failure-detail.js";
 import { FC008_FEATURE_POLICY_VERSION, type FeatureVocabulary } from "./feature-policy.js";
-import { type FailureStage, type FailureReason, createFailureDetail } from "./failure-detail.js";
 import type { FreshnessValidator } from "./freshness.js";
 import {
   type ActionHypothesis,
@@ -33,6 +30,8 @@ import {
   type InferenceDiagnostics,
   validateActionHypothesis,
 } from "./hypothesis.js";
+import type { ClassHeadIndices } from "./inference/artifact.js";
+import { composeFactorizedLogits } from "./inference/scoring.js";
 import { type ActionObservation, validateActionObservation } from "./observation.js";
 import {
   PRE_INFERENCE_MAX_STEP,
@@ -57,9 +56,9 @@ import {
   createHypothesisResult,
 } from "./result.js";
 import {
+  FC008_SUPPORTED_TUPLE_COUNT,
   FC008_SUPPORT_MATRIX,
   FC008_SUPPORT_MATRIX_VERSION,
-  FC008_SUPPORTED_TUPLE_COUNT,
 } from "./support-matrix.js";
 import { type RuntimeSupportDiagnostics, assessSupport } from "./support.js";
 import { InferenceDeadline, type RuntimeClock } from "./timing.js";
@@ -138,6 +137,12 @@ export interface UnderstandingRuntimeDeps {
   readonly idGenerator: IdGenerator;
   /** When false, no `InferenceDiagnostics` are emitted anywhere. */
   readonly researchMode: boolean;
+  /**
+   * Frozen 13-tuple composition mapping. Required to score a factorized
+   * payload. Taken from the already-loaded Sprint-3 artifact, never invented
+   * from holdout results. Absent mapping still fails closed.
+   */
+  readonly factorizedComposition?: readonly ClassHeadIndices[];
 }
 
 interface RankedClass {
@@ -466,16 +471,36 @@ function evaluateObservationInternal(
     return fail("MODEL_VERSION_MISMATCH", observation.id, "provider", "provider-family-divergence");
   }
 
-  // --- FACTORIZED COMPOSITION: DEFERRED ----------------------------------
-  // The provider boundary preserves all three factorized heads losslessly, but
-  // composing them into a distribution over the 13 supported tuples requires
-  // supported-set renormalisation and unsupported-combination mass accounting,
-  // which are Sprint 3 deliverables. Rather than fake a probability, the runtime
-  // refuses the factorized path with an explicit operational result.
+  // --- FACTORIZED COMPOSITION: RUNTIME-OWNED -----------------------------
+  // Providers emit raw 10/9/10 heads. Composition is the frozen additive sum
+  // over the 13 supported tuples only. Temperature is applied later, by the
+  // calibrator, never to the heads and never over a 900-class softmax.
+  let tupleLogits: readonly number[];
   if (scoreSet.scores.family === "factorized-logistic") {
-    return fail("MODEL_UNAVAILABLE", observation.id, "composition", "composition-not-implemented");
+    const mapping = deps.factorizedComposition;
+    if (mapping === undefined || mapping.length !== FC008_SUPPORTED_TUPLE_COUNT) {
+      return fail(
+        "MODEL_UNAVAILABLE",
+        observation.id,
+        "composition",
+        "composition-not-implemented",
+      );
+    }
+    try {
+      tupleLogits = composeFactorizedLogits(
+        {
+          verb: scoreSet.scores.verbLogits,
+          objectKind: scoreSet.scores.objectLogits,
+          transitionProperty: scoreSet.scores.transitionLogits,
+        },
+        mapping,
+      );
+    } catch {
+      return fail("INTERNAL_ERROR", observation.id, "composition", "unhandled-exception");
+    }
+  } else {
+    tupleLogits = scoreSet.scores.tupleLogits;
   }
-  const tupleLogits = scoreSet.scores.tupleLogits;
 
   // --- CALIBRATION: runtime-owned ----------------------------------------
   let calibrationOutcome: CalibrationOutcome;
