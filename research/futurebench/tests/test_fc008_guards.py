@@ -1016,8 +1016,45 @@ class TestSprintThreeNonInvocation:
         ):
             assert forbidden not in source
 
+    #: The only modules permitted to invoke or import an authorizing function.
+    #:
+    #: ``unlock.py`` defines them. ``evaluation.py`` and ``final_evaluation.py`` are the
+    #: Sprint-4A final-evaluation harness, whose entire purpose is to require
+    #: authorization before a sealed partition can be opened — a harness that could not
+    #: call the authorizers could not enforce anything.
+    #:
+    #: Naming them is what keeps this a real check. The scan below still walks EVERY
+    #: module by glob, so a newly added generation module that reaches for an authorizer
+    #: fails here until someone deliberately adds it to this set and justifies it.
+    AUTHORIZING_CALLERS_PERMITTED = frozenset(
+        {"unlock.py", "evaluation.py", "final_evaluation.py", "sealed.py"}
+    )
+
+    #: Modules that generate the frozen research state. None may ever authorize.
+    GENERATION_MODULES = frozenset(
+        {
+            "artifacts.py",
+            "calibration.py",
+            "corpus.py",
+            "golden.py",
+            "models.py",
+            "policy.py",
+            "train.py",
+        }
+    )
+
+    def test_the_permitted_set_is_disjoint_from_the_generation_pipeline(self):
+        """The two sets must not overlap, or the scan below would permit a generator."""
+        assert not (self.AUTHORIZING_CALLERS_PERMITTED & self.GENERATION_MODULES)
+        source_root = RESEARCH_ROOT / "src" / "futurebench" / "fc008"
+        present = {path.name for path in source_root.glob("*.py")}
+        # Both sets must describe modules that actually exist, so neither can rot into
+        # a list of names that no longer corresponds to anything.
+        assert self.AUTHORIZING_CALLERS_PERMITTED <= present
+        assert self.GENERATION_MODULES <= present
+
     def test_no_generation_module_calls_the_unlock(self):
-        """No module outside unlock.py invokes or imports an authorizing function.
+        """Only the permitted modules invoke or import an authorizing function.
 
         Parsed rather than grepped. Importing the contract CONSTANTS is legitimate and
         expected — the preregistration has to describe the protocol it is freezing, and
@@ -1031,10 +1068,13 @@ class TestSprintThreeNonInvocation:
             "assert_authorization_matches_artifacts",
             "load_frozen_research_identity",
             "load_trusted_research_identity",
+            "authorize_real_opening",
         }
+        scanned: set[str] = set()
         for path in sorted(source_root.glob("*.py")):
-            if path.name == "unlock.py":
+            if path.name in self.AUTHORIZING_CALLERS_PERMITTED:
                 continue
+            scanned.add(path.name)
             tree = ast.parse(path.read_text(), filename=str(path))
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
@@ -1050,6 +1090,9 @@ class TestSprintThreeNonInvocation:
                 if isinstance(node, ast.ImportFrom) and node.module == "unlock":
                     imported = {alias.name for alias in node.names}
                     assert not (imported & authorizing), f"{path.name} imports an authorizer"
+
+        # Not vacuous: the whole generation pipeline must actually have been walked.
+        assert self.GENERATION_MODULES <= scanned
 
 
 class TestSingleThreadVerification:

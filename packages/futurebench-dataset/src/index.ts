@@ -8,6 +8,7 @@
  * someone has to remember.
  */
 
+export * from "./artifact-source.js";
 export * from "./audit.js";
 export * from "./authoring.js";
 export * from "./canonical.js";
@@ -18,6 +19,7 @@ export * from "./oracle.js";
 export * from "./partition.js";
 export * from "./record.js";
 export * from "./scenario.js";
+export * from "./sealed-source.js";
 export * from "./variants.js";
 export * from "./vocabulary.js";
 export { FAMILY_A } from "./apps/family-a.js";

@@ -49,6 +49,9 @@ function runExportFrom(cwd: string): ExportSummary {
 }
 
 describe("development corpus export path", () => {
+  // Two sequential full dataset builds. Under Turbo-parallel load each build
+  // can take ~8s, so the pair exceeds the package-local 15s headroom. Extra
+  // wall-clock room only — same two invocations, no retry, no weaker assertion.
   it("targets the same canonical file from the repository root and the package directory", () => {
     const fromRoot = runExportFrom(REPOSITORY_ROOT);
     const fromPackage = runExportFrom(PACKAGE_DIR);
@@ -56,7 +59,7 @@ describe("development corpus export path", () => {
     expect(fromRoot.outputPath).toBe(CANONICAL_CORPUS);
     expect(fromPackage.outputPath).toBe(CANONICAL_CORPUS);
     expect(fromRoot.outputPath).toBe(fromPackage.outputPath);
-  });
+  }, 30_000);
 
   it("writes inside the repository regardless of where it is invoked", () => {
     // The original bug produced a path that merely looked plausible. Containment is

@@ -239,9 +239,41 @@ describe("the package depends only on inert contract packages", () => {
   });
 });
 
+/**
+ * Export names that trip a capability pattern without being a capability.
+ *
+ * Each needs a reason, and each must still correspond to a real export, so the
+ * list cannot rot into a blanket excuse for whatever the surface grows into.
+ * Keeping the patterns strict and naming the exceptions is the point: a new
+ * offending export fails until someone justifies it here.
+ */
+const CAPABILITY_PATTERN_EXEMPTIONS = new Map([
+  [
+    "applyTemperature",
+    "divides a vector of numbers by the frozen calibration temperature; it applies arithmetic, not an action to a page",
+  ],
+  [
+    "ARTIFACT_LOAD_REFUSALS",
+    "the categorical reasons an artifact VALUE is refused during parsing; reading bytes lives in @futureclick/futurebench-dataset, so nothing here loads anything",
+  ],
+  [
+    "ArtifactLoadError",
+    "the error type carrying one of those refusals; same reason, it is a rejection reason and not a loader",
+  ],
+]);
+
 describe("the public surface exposes no capability", () => {
+  it("records that every capability-pattern exemption is a real export", () => {
+    for (const name of CAPABILITY_PATTERN_EXEMPTIONS.keys()) {
+      expect(Object.keys(actionUnderstanding)).toContain(name);
+    }
+  });
+
   it("exports no function whose name implies acting on a page", () => {
     for (const name of Object.keys(actionUnderstanding)) {
+      if (CAPABILITY_PATTERN_EXEMPTIONS.has(name)) {
+        continue;
+      }
       expect(name).not.toMatch(/^(click|submit|navigate|release|execute|perform|dispatch|apply)/i);
     }
   });
@@ -313,6 +345,9 @@ describe("Sprint 1 produces no user-facing prediction and no side effect", () =>
 
   it("ships no persistence, telemetry, or remote inference path", () => {
     for (const name of Object.keys(actionUnderstanding)) {
+      if (CAPABILITY_PATTERN_EXEMPTIONS.has(name)) {
+        continue;
+      }
       expect(name).not.toMatch(/(persist|store|save|load|telemetry|report|upload|remote|fetch)/i);
     }
   });

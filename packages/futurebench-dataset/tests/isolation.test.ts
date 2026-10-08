@@ -199,6 +199,7 @@ describe("browser and release safety", () => {
     "partition.ts",
     "record.ts",
     "scenario.ts",
+    "sealed-source.ts",
     "variants.ts",
     "vocabulary.ts",
   ].map((name) => [name, read(join(datasetRoot, "src", name))] as const);
