@@ -6,6 +6,10 @@
  * Initializes the development indicator and observation controller ONLY if location is authorized (Finding M6).
  */
 
+import { tryCreateFc008ActionUnderstandingSidecar } from "../fc008/production-sidecar.js";
+// Frozen artifact JSON is intentionally not imported here. Default host config
+// has no family/gates, so the sidecar stays absent and both model families stay
+// out of the disabled content-script module graph.
 import { isLocationAuthorized } from "./capture.js";
 import { BrowserExtensionController } from "./controller.js";
 
@@ -19,7 +23,13 @@ export function bootstrapExtension(): boolean {
   }
 
   try {
-    const controller = new BrowserExtensionController();
+    const actionUnderstanding = tryCreateFc008ActionUnderstandingSidecar();
+    const controller = new BrowserExtensionController(
+      undefined,
+      undefined,
+      undefined,
+      actionUnderstanding,
+    );
     controller.init();
     return true;
   } catch {

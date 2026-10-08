@@ -26,6 +26,9 @@ importers:
       '@futureclick/action-schema':
         specifier: workspace:*
         version: link:../../packages/action-schema
+      '@futureclick/action-understanding':
+        specifier: workspace:*
+        version: link:../../packages/action-understanding
       '@futureclick/browser-adapter':
         specifier: workspace:*
         version: link:../../packages/browser-adapter

@@ -23,14 +23,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
-import * as actionUnderstanding from "../src/index.js";
 import { createEphemeralDisplayContext } from "../src/display.js";
+import * as actionUnderstanding from "../src/index.js";
 import type { ActionObservation, ObservationSemantics } from "../src/observation.js";
-import { createNullScoringProvider } from "../src/providers/null-provider.js";
 import type { ProviderOutcome, ProviderScoringContext, ScoringProvider } from "../src/provider.js";
+import { createNullScoringProvider } from "../src/providers/null-provider.js";
+import { isFailedResult, isHypothesisResult } from "../src/result.js";
 import { evaluateObservation } from "../src/runtime.js";
 import type { UnderstandingRuntimeDeps } from "../src/runtime.js";
-import { isFailedResult, isHypothesisResult } from "../src/result.js";
 import { buildObservationInput, buildRuntimeDeps, buildSemantics } from "./helpers.js";
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -301,6 +301,14 @@ const ALLOWED_EXPORTS = [
   "ACTION_OBSERVATION_SCHEMA_VERSION",
   "ALLOWED_PRIMARY_FEATURE_FAMILIES",
   "ARTIFACT_IDENTITY_FIELDS",
+  "BROWSER_ARTIFACT_IDENTITY_LAYERS",
+  "BROWSER_ARTIFACT_SOURCE_ID",
+  "BROWSER_BRIDGE_RETENTION",
+  "EMPTY_BROWSER_INDICATOR",
+  "FC008_BROWSER_MESSAGE_FORBIDDEN_KEYS",
+  "FC008_BROWSER_MESSAGE_KEYS",
+  "FC008_BROWSER_MESSAGE_SCHEMA_VERSION",
+  "FC008_BROWSER_MESSAGE_TYPE",
   "ARTIFACT_LOAD_REFUSALS",
   "ArtifactLoadError",
   "CALIBRATION_METHOD",
@@ -415,6 +423,9 @@ const ALLOWED_EXPORTS = [
   "countBucket",
   "countUnknownCategoricals",
   "createAbstainedResult",
+  "createBrowserActionUnderstandingBridge",
+  "createBrowserArtifactBundle",
+  "createEmptyBrowserPredictionState",
   "createEphemeralDisplayContext",
   "createFailedResult",
   "createFailureDetail",
@@ -444,6 +455,7 @@ const ALLOWED_EXPORTS = [
   "inferJoint",
   "inspectClosedObject",
   "invalid",
+  "isRecognizedBrowserFamily",
   "invariantsWithStatus",
   "isAbstainedResult",
   "isEpistemicAbstentionReason",
@@ -492,6 +504,7 @@ const ALLOWED_EXPORTS = [
   "validateAbstentionPolicy",
   "validateActionHypothesis",
   "validateActionObservation",
+  "validateFc008BrowserMessage",
   "validateFreshnessBinding",
   "validateProviderOutcome",
   "verifyInvariantNumbering",

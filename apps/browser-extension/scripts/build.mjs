@@ -51,6 +51,11 @@ console.log("[build] FC-005 content script bundled successfully to:", fc005Outfi
 console.log("[build] FC-006 interception bundle successfully to:", fc006Outfile);
 console.log("[build] FC-007 observation bundle successfully to:", fc007Outfile);
 
+const staleFc008 = path.join(outdir, "fc008-bridge.bundle.js");
+if (fs.existsSync(staleFc008)) {
+  fs.rmSync(staleFc008, { force: true });
+}
+
 // Smoke-only bundle: emitted only when explicitly requested (test harness).
 // Never written into normal production packaging by default.
 if (process.env.FC007_BUILD_SMOKE === "1") {

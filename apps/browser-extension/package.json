@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@futureclick/action-schema": "workspace:*",
+    "@futureclick/action-understanding": "workspace:*",
     "@futureclick/browser-adapter": "workspace:*",
     "@futureclick/consequence-engine": "workspace:*",
     "@futureclick/shared": "workspace:*"

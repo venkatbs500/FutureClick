@@ -367,18 +367,15 @@ describe("the manifest admits nothing through which a model runtime could arrive
     }
   });
 
-  it("keeps FC-008 inference out of the extension bundle today", () => {
-    // Documented rather than merely observed: the browser extension does not
-    // depend on `@futureclick/action-understanding` at all, so no part of the
-    // FC-008 inference path — including the pure scoring numerics — is shipped to
-    // a browser yet. The runtime-boundary work above is what makes adding that
-    // dependency later a safe, reviewable change rather than a bundling surprise.
+  it("lets the extension import the browser-safe package but not the Node loader", () => {
+    // Sprint 5B wires the headless runtime into the extension. The dependency
+    // must be this package (no node:fs) and must not pull the dataset loader.
     const extension = readManifest(
       join(packageRoot, "..", "..", "apps", "browser-extension", "package.json"),
     );
     const dependencies = Object.keys(extension.dependencies ?? {});
-    expect(dependencies.length).toBeGreaterThan(0);
-    expect(dependencies).not.toContain("@futureclick/action-understanding");
+    expect(dependencies).toContain("@futureclick/action-understanding");
+    expect(dependencies).not.toContain("@futureclick/futurebench-dataset");
   });
 
   it("resolved the extension manifest from inside the repository", () => {

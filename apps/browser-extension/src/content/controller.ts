@@ -12,13 +12,22 @@
  * - Entirely local; zero network requests or background messaging.
  */
 
-import { BrowserAdapterEngine } from "@futureclick/browser-adapter";
+import { BrowserAdapterEngine, type BrowserObservation } from "@futureclick/browser-adapter";
 import {
   ConsequenceEngine,
   createDeterministicRuleEvaluator,
 } from "@futureclick/consequence-engine";
 import { captureButtonObservation, resolveActivationButton } from "./capture.js";
 import { DevelopmentIndicator } from "./indicator.js";
+
+/**
+ * Optional FC-008 observation sidecar. The controller hands off the already
+ * captured detached BrowserObservation and never interprets model policy.
+ */
+export interface ActionUnderstandingSidecar {
+  observe(observation: BrowserObservation): void;
+  clear(): void;
+}
 
 export class BrowserExtensionController {
   private isObserving = false;
@@ -27,11 +36,13 @@ export class BrowserExtensionController {
   private readonly adapterEngine: BrowserAdapterEngine;
   private readonly consequenceEngine: ConsequenceEngine;
   private readonly indicator: DevelopmentIndicator;
+  private readonly actionUnderstanding: ActionUnderstandingSidecar | undefined;
 
   constructor(
     indicator?: DevelopmentIndicator,
     adapterEngine?: BrowserAdapterEngine,
     consequenceEngine?: ConsequenceEngine,
+    actionUnderstanding?: ActionUnderstandingSidecar,
   ) {
     this.indicator = indicator ?? new DevelopmentIndicator();
     try {
@@ -45,6 +56,7 @@ export class BrowserExtensionController {
       this.consequenceEngine = new ConsequenceEngine();
       this.consequenceEngine.registerEvaluator(createDeterministicRuleEvaluator());
     }
+    this.actionUnderstanding = actionUnderstanding;
   }
 
   public init(): void {
@@ -59,6 +71,7 @@ export class BrowserExtensionController {
     this.sessionEpoch++;
     this.currentRequestSequence = 0;
     this.isObserving = true;
+    this.actionUnderstanding?.clear();
 
     // Attach passive capture-phase click listener
     if (typeof window !== "undefined") {
@@ -75,6 +88,7 @@ export class BrowserExtensionController {
     if (!this.isObserving) return;
     this.sessionEpoch++;
     this.isObserving = false;
+    this.actionUnderstanding?.clear();
 
     if (typeof window !== "undefined") {
       window.removeEventListener("click", this.handleDocumentClick, { capture: true });
@@ -116,6 +130,8 @@ export class BrowserExtensionController {
     if (!observation) {
       return;
     }
+
+    this.actionUnderstanding?.observe(observation);
 
     // 3. Central adapter evaluation
     const outcome = this.adapterEngine.adapt(observation);

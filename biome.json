@@ -16,7 +16,8 @@
       "**/pnpm-lock.yaml",
       "research/futurebench/artifacts/**",
       "research/futurebench/data/**",
-      "research/futurebench/results/**"
+      "research/futurebench/results/**",
+      "apps/browser-extension/src/fc008/frozen/**"
     ]
   },
   "formatter": {
