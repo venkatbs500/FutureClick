@@ -3,11 +3,16 @@
 `@futureclick/action-understanding` is the inert contract, trust-boundary, and
 runtime-policy layer for FutureClick's first learned component.
 
-Sprint 1 delivers **contracts and policy only**. There is no browser observation
-extraction, no sanitizer, no feature projector implementation, no training, no
-dataset, no model artifact, and no user-facing prediction. The package compiles,
-validates, decides, and refuses. It cannot predict, because no provider in it can
-score.
+FC-008 is implemented and closed as AI/ML action understanding. Its scope ends
+at isolated **PREDICTED** evidence. [§14](#14-fc-008-closure) is the current
+record and supersedes earlier planning language in this document that describes
+implementation, Sprint 5 runtime work, or the final evaluation as future work.
+
+Sprint 1 delivered **contracts and policy only**. At that freeze there was no
+browser observation extraction, no sanitizer, no feature projector
+implementation, no training, no dataset, no model artifact, and no user-facing
+prediction. The package compiled, validated, decided, and refused. It could not
+predict, because no provider in it could score.
 
 ## 1. What FC-008 is and is not
 
@@ -373,10 +378,14 @@ detail `composition/composition-not-implemented`.
 
 Composing three heads into a distribution over the thirteen supported tuples
 requires supported-set renormalisation and unsupported-combination mass
-accounting, which are Sprint 3 deliverables. The alternative would be to invent a
-probability, so the runtime declines. The refusal is operational rather than
-epistemic, because an unimplemented composition is a system limitation and not a
-statement about how difficult the input was.
+accounting. Those were later-sprint deliverables. Inventing a probability in
+Sprint 1 would have been the alternative, so that runtime declined. The refusal
+is operational rather than epistemic, because an unimplemented composition is a
+system limitation and not a statement about how difficult the input was.
+
+This subsection records the Sprint 1 refusal. Composition is implemented in the
+closed runtime. [§14](#14-fc-008-closure) supersedes this subsection as a
+description of the current system.
 
 ### A provider cannot self-certify anything
 
@@ -445,12 +454,12 @@ not done.
 
 ### Calibration placement
 
-`ScoreCalibrator` is defined in Sprint 1 as a runtime-owned **interface with no
-implementation**. The numeric transform — softmax, temperature scaling,
-factorized renormalisation onto the supported set — lands in Sprint 4 together
-with the golden Python/TypeScript parity vectors that are the only honest way to
-validate it. Tests inject a deterministic stub, explicitly documented as not the
-FC-008 implementation.
+`ScoreCalibrator` was defined in Sprint 1 as a runtime-owned **interface with no
+implementation**. Softmax, temperature scaling, and factorized renormalisation
+onto the supported set were implemented in Sprint 4, with golden
+Python/TypeScript parity vectors. Sprint 1 tests injected a deterministic stub,
+explicitly documented as not the FC-008 implementation. [§14](#14-fc-008-closure)
+is the current record.
 
 Calibration authority stays with the runtime regardless, which is what ADR-014
 requires.
@@ -538,9 +547,10 @@ as passing would make the table worthless as evidence, so it is not done.
 
 Status below is **as of Sprint 1**. Sprint 2 built the sanitizer and extractor
 these entries were waiting on and upgraded AI-4 and AI-7; see
-[FUTUREBENCH_SPRINT2.md](./FUTUREBENCH_SPRINT2.md) §14 for the current table. The
-Sprint-1 column is kept rather than overwritten so the reason each entry was not a
-pass at freeze time remains readable.
+[FUTUREBENCH_SPRINT2.md](./FUTUREBENCH_SPRINT2.md) §14 for that sprint's table.
+The Sprint-1 column is kept rather than overwritten so the reason each entry was
+not a pass at freeze time remains readable. Current readings for AI-18 and AI-23
+are in the notes below and in [§14](#14-fc-008-closure).
 
 | ID | Invariant | Sprint 1 status |
 |---|---|---|
@@ -569,7 +579,10 @@ pass at freeze time remains readable.
 | **AI-23** | The future research-mode indicator is inert, contains no predicted consequence content, and has no execution authority. | **DEFERRED** |
 | **AI-24** | No persistence or production telemetry exists in FC-008 V1. | PASS |
 
-### Why the four non-PASS entries are not PASS
+### Why four Sprint 1 entries were not PASS
+
+The Sprint 1 column is historical. Parenthetical notes record later
+implementation. They do not change the invariant wording.
 
 - **AI-4 — DEFERRED.** The ordering is declared and the observation carries a
   sanitizer version and a redaction record, but **the real sanitizer is a
@@ -586,11 +599,16 @@ pass at freeze time remains readable.
   within synthetic scope — differential tests over injected instructions show the
   label, policy, caps, and support matrix all unchanged.)*
 - **AI-18 — PARTIAL (STRUCTURAL).** The package manifest contains no training
-  dependency and a closed allowlist test enforces that. The **offline training
-  environment is a Sprint 3 deliverable**, so the separation is currently
-  asserted on the runtime side only.
-- **AI-23 — DEFERRED.** No research-mode indicator exists. The requirement is
-  recorded for **Sprint 5** and is not claimed as satisfied.
+  dependency and a closed allowlist test enforces that. Sprint 1 could assert
+  the separation on the runtime side only, because the offline training
+  environment did not exist yet. *(Sprint 3: offline NumPy and scikit-learn
+  training lives in `research/futurebench` and is separate from TypeScript and
+  browser inference. The invariant still means that split, not a change to what
+  the runtime is allowed to import.)*
+- **AI-23 — DEFERRED.** Sprint 1 had no research-mode indicator. *(Sprint 5A:
+  `researchIndicatorFromResult` is an inert view model. It contains no predicted
+  consequence content and has no execution authority. The browser content script
+  does not render it.)*
 
 ### Two PASS entries whose scope is worth stating
 
@@ -630,10 +648,12 @@ layers, in `tests/isolation.test.ts`:
 Static string scanning remains as defence in depth, but it is no longer the only
 evidence for any invariant.
 
-## 12. Research process contracts (documented, not implemented)
+## 12. Research process contracts
 
-These are recorded here so later sprints cannot drift from them. Sprint 1
-implements none of them.
+These rules were recorded in Sprint 1, which implemented none of them, so later
+sprints could not drift from them. They are implemented in the closed system.
+[§14](#14-fc-008-closure) supersedes any reading of this section as still future
+work. The rules themselves remain binding.
 
 ### Six partitions
 
@@ -648,8 +668,10 @@ implements none of them.
 
 ### Preregistration
 
-`FC008_PREREGISTRATION.md` is finalized and **frozen at the end of Sprint 3**.
-Sprint 4 begins only after the freeze. No final partition is read before it.
+`FC008_PREREGISTRATION.md` was finalized and **frozen at the end of Sprint 3**,
+before Sprint 4. No final partition was read before that freeze. The one-shot
+final evaluation must not be rerun to select a model family. See
+[§14](#14-fc-008-closure) and ADR-016.
 
 ### No final-test model selection
 
@@ -706,3 +728,173 @@ applications.
 `sdist`, `wheels`, `downloads`, or `logs`. Sprint 3 and later model artifacts and
 dataset manifests must avoid those directory names or they will be silently
 untracked.
+
+## 14. FC-008 Closure
+
+FC-008, AI/ML action understanding, is implemented and closed. Its scope ends at
+isolated **PREDICTED** evidence. This section supersedes earlier text in this
+document that describes FC-008 implementation as future work, Sprint 5 runtime
+work as deferred, or the final evaluation as not yet run. Historical Sprint 1
+wording that is explicitly labeled as Sprint 1 is left in place.
+
+### Released commits
+
+| Sprint | Commit | Role |
+|---|---|---|
+| 1 | `918ab0d8fc004058bb818b3b97ba545d2ae4d795` | Contracts and policy |
+| 2 | `6675c4f2995ec397395e148d4277b15ee0424692` | FutureBench data foundation |
+| 3 | `d722d13ecae5f7a4111616227b6660fa7c5a6841` | Reference models, calibration, policy |
+| 4 pre-open | `ad3ec754bc7f90fbabb4fd244358dc980f13541e` | Frozen final-evaluation pipeline |
+| 4 one-shot evidence | `7ba82acdd624a222689b17f901cec3f79f2a28a7` | Canonical final result |
+| 5A | `465ae882fde96e55615abe8753dbabdd7f08890e` | Headless TypeScript runtime |
+| 5B | `e0d00bc5b4a07e0181d6334818a165aeeec77470` | Browser runtime bridge |
+
+### What the closed system includes
+
+Committed FC-008 includes privacy-safe `ActionObservation` contracts and
+feature projection; deterministic support and novelty handling; abstention;
+the synthetic FutureBench dataset; frozen train, calibration, policy, and test
+partitions; a joint semantic-tuple logistic model and a factorized
+verb/object/transition-property logistic model; temperature calibration;
+runtime-owned confidence and policy; reproducibility controls; golden vectors;
+Python/TypeScript parity; the frozen final research evaluation; a headless
+TypeScript runtime; a browser-safe runtime bridge; freshness and supersession
+protection; a 250 ms publication deadline; explicit model-family configuration;
+local frozen browser artifacts; and immutable PREDICTED, abstained, and failed
+results.
+
+The runtime does not use the network, persist results, or download a remote
+model. It has no FC-007 execution authority.
+
+### Epistemic scope
+
+FC-008 outputs **PREDICTED** evidence only, in the sense fixed by ADR-006 and
+ADR-010.
+
+It does not promote PREDICTED to VERIFIED, combine VERIFIED with PREDICTED,
+click, submit, continue, approve, release, invoke native-click execution, or
+authoritatively mutate ActionGraph consequence truth.
+
+### FC-009 handoff
+
+FC-009 is the next planned scope: hybrid intelligence that combines VERIFIED
+evidence with AI PREDICTED evidence. That combination is intentionally outside
+FC-008. FC-009 is not implemented here, and this record states no FC-009
+performance result and no FC-009 architecture beyond that boundary.
+
+### Final evaluation
+
+The canonical result is
+`research/futurebench/results/fc008-final-evaluation.json`, SHA-256
+`ed0fe951525f05ac858a8ba3ce0420274a7a86919acf7214e10fefb46d8cbacc`.
+
+The evaluation was one-shot and frozen. It must not be rerun for model
+selection. It selected no production model-family winner. ADR-016 remains
+binding.
+
+### RQ1
+
+Factorized modeling did not establish superiority over the joint classifier on
+the frozen out-of-application evaluation.
+
+Structured exact-match delta, factorized minus joint:
+`-0.18181818181818188`.
+
+Fixed-13 macro-F1 delta, factorized minus joint:
+`-0.10581302755215799`.
+
+Out-of-application inference was low-powered on six lineages. The
+transition-redundancy disclosure in section 3 still applies: no observed
+difference is attributed solely to transition factorization. This result does
+not say that the joint model is universally better, and it does not say that
+factorized modeling failed as a research direction. The valid conclusion is
+only that factorized superiority was not established under the frozen
+experiment.
+
+### RQ2
+
+Temperature scaling produced mixed effects across model families, metrics, and
+the in-distribution and out-of-application settings. It is not summarized as
+universally improving calibration. No production family winner was selected.
+
+### Limitations
+
+- The benchmark is authored synthetic FutureBench content.
+- Out-of-application evaluation uses six lineages and is low-powered.
+- Differences are not causally attributed solely to factorization.
+- The deterministic novelty gate is not evidence of robust statistical
+  out-of-distribution detection.
+- No production model-family winner was selected.
+- Current browser capture does not provide real-world production prediction
+  coverage.
+
+### Browser capture boundary
+
+The production handoff exists:
+
+FC-005 capture → optional FC-008 sidecar → mapper → browser bridge → headless
+runtime.
+
+Current FC-005 `BrowserObservation` does not contain enough trustworthy,
+privacy-safe observed semantics to build an `ActionObservation` for production
+inference. The mapper returns `extraction-refused` rather than inventing
+evidence. Later privacy-safe semantic capture can feed the existing bridge
+without redesigning FC-008. That is not current production prediction support.
+
+### Fixture and oracle exclusion
+
+The production mapper excludes fixture and site metadata from primary model
+input, including `operation`, `currentVisibility`, `requestedVisibility`,
+`fixtureContract`, `routeId`, `entityKey`, and `origin`. It does not invent
+object kind, control text, heading, nearby labels, or ancestor depth.
+
+### AI-18 and AI-23
+
+AI-18 requires offline training dependencies to stay separate from
+browser/TypeScript runtime dependencies. That separation is present: research
+training uses NumPy and scikit-learn under `research/futurebench`; inference in
+the package and the browser is TypeScript. The Sprint 1 table cell remains
+PARTIAL (STRUCTURAL) as a historical status.
+
+AI-23 requires an inert research/prediction indicator with no predicted
+consequence content and no execution authority. Sprint 5A provides
+`researchIndicatorFromResult` on those terms. The content script does not
+render an FC-008 indicator. The Sprint 1 table cell remains DEFERRED as a
+historical status.
+
+### Accepted findings
+
+These are accepted and not resolved.
+
+**LOW 1.** The disabled browser content bundle is approximately 518 KB, compared
+with roughly 341 KB before Sprint 5B. Frozen coefficient matrices are not
+embedded in the disabled default module graph, and an empty host configuration
+constructs no runtime.
+
+**LOW 2.** `research/futurebench/results/**` remains broadly ignored by Biome,
+from the Sprint 5A ignore entry in `biome.json`.
+
+**NOTE 1.** Current FC-005 capture lacks enough trustworthy privacy-safe
+semantics for production FC-008 inference.
+
+**NOTE 2.** Mapper refusal or failed capture can leave prior internal sidecar
+state. `understandBrowserObservation` returns the existing bridge state when
+mapping is refused. No FC-008 indicator is currently rendered. Future
+user-visible indicator work must revisit clearing semantics.
+
+**NOTE 3.** A declared fingerprint/body mismatch may publish `SCHEMA_INVALID`.
+An equal-sequence semantic conflict is separately protected and does not
+replace `currentState`.
+
+**NOTE 4.** The known frozen FC-007 parallel `requestSequence` timing flake
+remains outside FC-008. FC-007 source and bundle remained unchanged, and serial
+validation passes under the established rule.
+
+### Privacy and authority
+
+Primary learned features exclude site and application identity, private names,
+fixture and oracle tokens, raw DOM, HTML, and selectors, passwords, tokens, and
+storage, screenshots, clipboard, keystrokes, accessibility-tree dumps,
+evaluation labels, and split identifiers.
+
+FC-008 has no FC-007 release authority.
