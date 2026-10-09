@@ -225,6 +225,25 @@ importers:
         specifier: ^3.0.7
         version: 3.2.7(@types/node@20.19.43)(happy-dom@18.0.1)
 
+  packages/hybrid-intelligence:
+    dependencies:
+      '@futureclick/action-schema':
+        specifier: workspace:*
+        version: link:../action-schema
+      '@futureclick/action-understanding':
+        specifier: workspace:*
+        version: link:../action-understanding
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.2.7(@types/node@20.19.43)(happy-dom@18.0.1)
+
   packages/privacy:
     dependencies:
       '@futureclick/shared':

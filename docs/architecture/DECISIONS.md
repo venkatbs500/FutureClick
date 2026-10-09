@@ -125,3 +125,16 @@
   7. The permitted claim is that the comparison evaluates two complete, naturally defined architectures under an identical procedure. It is not claimed that any observed difference is caused solely by compositional representation.
   8. The preregistration document is finalized and frozen at the end of Sprint 3, before any final partition is read.
 - **Consequences:** The generalization estimate stays interpretable and the comparison stays honest, including the honest outcome in which neither family is distinguishable. The cost is that FC-008 ends without a shipping recommendation, and a later product decision needs its own ADR and its own evidence.
+
+## ADR-017: Hybrid Epistemic Composition (FC-009)
+- **Status:** Accepted
+- **Context:** FC-008 produces PREDICTED action hypotheses. Deterministic rules produce VERIFIED consequence claims. Combining them is useful for presentation and research, but the obvious shortcuts — collapsing both into a single confidence, promoting agreement to verification, or letting the model break contradictory deterministic evidence — would erase the modality boundary established by ADR-006 and ADR-010 and would invite treating AI agreement as release authority.
+- **Decision:**
+  1. Modalities remain separate. VERIFIED and PREDICTED are not interchangeable confidence levels. Agreement never changes a PREDICTED claim into VERIFIED.
+  2. Relationship classification is deterministic and identity-based (`AGREES`, `CONFLICTS`, `VERIFIED_ONLY`, `PREDICTION_ONLY`, `INCOMPARABLE`, plus abstention, failure, stale, and verified-conflict). Confidence thresholds do not decide the relationship.
+  3. Pairwise relationships use generic endpoints (`leftClaim` / `rightClaim` with explicit evidence mode and identity). VERIFIED↔VERIFIED conflict is not forced through a predicted field. Endpoint order and relationship-array order are canonical, so the same semantic set is caller-order-independent.
+  4. VERIFIED has epistemic precedence over PREDICTED when a consumer needs a preferred factual basis. That precedence is not release authority. FC-009 authorizes no click, submit, continue, approve, release, capability grant, or native dispatch.
+  5. There is no fused or averaged confidence. Each claim keeps the confidence that is meaningful for its own modality; VERIFIED claims do not invent one.
+  6. A PREDICTED claim cannot adjudicate conflicting VERIFIED claims. The hybrid layer emits `VERIFIED_CONFLICT` naming both claims and refuses authoritative simplification.
+  7. An `unknown` state token is not comparable. Identical unknown transitions are `INCOMPARABLE`, never agreement or conflict.
+- **Consequences:** Downstream surfaces can show agreement and disagreement without laundering prediction into verification. The cost is that consumers must join two evidence records explicitly, and hybrid output cannot be treated as an execution decision.
